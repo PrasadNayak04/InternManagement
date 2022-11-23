@@ -2,8 +2,6 @@ package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.*;
-import com.robosoft.internmanagement.service.jwtSecurity.JwtFilter;
-import com.robosoft.internmanagement.service.jwtSecurity.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -13,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -118,9 +117,9 @@ public class RecruiterService implements RecruiterServices
                 }, date, offset, limit);
 
         if(pageNo ==1) {
-            return List.of(totalCount, cvAnalyses.size(), cvAnalyses);
+            return Arrays.asList(totalCount, cvAnalyses.size(), cvAnalyses);
         }
-        return List.of(cvAnalyses.size(), cvAnalyses);
+        return Arrays.asList(cvAnalyses.size(), cvAnalyses);
 
     }
 
@@ -245,9 +244,9 @@ public class RecruiterService implements RecruiterServices
                     }, memberService.getUserNameFromRequest(request), status, designation, offset, limit);
 
             if(pageNo == 1) {
-                return List.of(totalCount, profileAnalyses.size(), profileAnalyses);
+                return Arrays.asList(totalCount, profileAnalyses.size(), profileAnalyses);
             }
-            return List.of(profileAnalyses.size(), profileAnalyses);
+            return Arrays.asList(profileAnalyses.size(), profileAnalyses);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -305,9 +304,9 @@ public class RecruiterService implements RecruiterServices
         List<AssignBoardPage> assignBoardPages = jdbcTemplate.query(query,new BeanPropertyRowMapper<>(AssignBoardPage.class), currentUser, offset, limit);
 
         if(pageNo == 1){
-            return List.of(totalCount, assignBoardPages.size(), assignBoardPages);
+            return Arrays.asList(totalCount, assignBoardPages.size(), assignBoardPages);
         }
-        return List.of(assignBoardPages.size(), assignBoardPages);
+        return Arrays.asList(assignBoardPages.size(), assignBoardPages);
     }
 
     public List<?> getRejectedCvPage(int pageNo, int limit, HttpServletRequest request)
@@ -337,9 +336,9 @@ public class RecruiterService implements RecruiterServices
                     },"REJECTED",memberService.getUserNameFromRequest(request), offset, limit);
 
             if(pageNo == 1){
-                return List.of(totalCount, rejectedCvList.size(), rejectedCvList);
+                return Arrays.asList(totalCount, rejectedCvList.size(), rejectedCvList);
             }
-            return List.of(rejectedCvList.size(), rejectedCvList);
+            return Arrays.asList(rejectedCvList.size(), rejectedCvList);
         }catch (Exception e)
         {
             e.printStackTrace();
@@ -391,9 +390,9 @@ public class RecruiterService implements RecruiterServices
         List<SentInvite> sentInvites = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(SentInvite.class),date,memberService.getUserNameFromRequest(request), offset, limit);
 
         if(pageNo == 1){
-            return List.of(totalCount, sentInvites.size(), sentInvites);
+            return Arrays.asList(totalCount, sentInvites.size(), sentInvites);
         }
-        return List.of(sentInvites.size(), sentInvites);
+        return Arrays.asList(sentInvites.size(), sentInvites);
 
     }
 
@@ -409,9 +408,9 @@ public class RecruiterService implements RecruiterServices
         List<SentInvite> sentInvites = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(SentInvite.class), date.toLocalDate().getMonthValue(),date.toLocalDate().getYear(), memberService.getUserNameFromRequest(request), offset, limit);
 
         if(pageNo == 1){
-            return List.of(totalCount, sentInvites.size(), sentInvites);
+            return Arrays.asList(totalCount, sentInvites.size(), sentInvites);
         }
-        return List.of(sentInvites.size(), sentInvites);
+        return Arrays.asList(sentInvites.size(), sentInvites);
 
     }
 
@@ -428,9 +427,9 @@ public class RecruiterService implements RecruiterServices
         List<SentInvite> sentInvites = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(SentInvite.class),date.toLocalDate().getYear(),memberService.getUserNameFromRequest(request), offset, limit);
 
         if(pageNo == 1){
-            return List.of(totalCount, sentInvites.size(), sentInvites);
+            return Arrays.asList(totalCount, sentInvites.size(), sentInvites);
         }
-        return List.of(sentInvites.size(), sentInvites);
+        return Arrays.asList(sentInvites.size(), sentInvites);
 
        }
 }

@@ -11,12 +11,12 @@ import com.robosoft.internmanagement.modelAttributes.MemberProfile;
 import com.robosoft.internmanagement.service.jwtSecurity.BeanStore;
 import com.robosoft.internmanagement.service.jwtSecurity.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -217,9 +217,9 @@ public class MemberService implements MemberServices
         query = "select notificationId, message, date, type from Notifications where emailId = ? and deleted =0 order by notificationId desc limit ?, ?";
         List<Notification> notifications = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Notification.class), getUserNameFromRequest(request), offset, limit);
         if(pageNo ==1) {
-            return List.of(totalCount, notifications.size(), notifications);
+            return Arrays.asList(totalCount, notifications.size(), notifications);
         }
-        return List.of(notifications.size(), notifications);
+        return Arrays.asList(notifications.size(), notifications);
     }
 
     public String encodePassword(String password){
