@@ -61,8 +61,8 @@ public class EmailService implements EmailServices
             String OTP=String.valueOf(otp);
             try
             {
-                jdbcTemplate.queryForObject("select emailId from ForgotPasswords where emailId=?", String.class,toEmail);
-                jdbcTemplate.update("update ForgotPasswords set otp=?,expireTime=? where emailId=?",OTP,(System.currentTimeMillis()/1000/60),toEmail);
+                jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,toEmail);
+                jdbcTemplate.update("update forgotpasswords set otp=?,expireTime=? where emailId=?",OTP,(System.currentTimeMillis()/1000/60),toEmail);
                 return flag = true;
             }
             catch (Exception e)
@@ -83,7 +83,7 @@ public class EmailService implements EmailServices
     public boolean insert(String emailId,String code)
     {
         try{
-            jdbcTemplate.update("insert into ForgotPasswords values (?,?,?)",emailId,code,(System.currentTimeMillis()/1000)+120);
+            jdbcTemplate.update("insert into forgotpasswords values (?,?,?)",emailId,code,(System.currentTimeMillis()/1000)+120);
             return true;
         }catch (Exception e){
             return false;
@@ -93,7 +93,7 @@ public class EmailService implements EmailServices
 
     public String verification(String emailId, String otp)
     {
-        String verify = jdbcTemplate.queryForObject("select otp from ForgotPasswords where emailId=?", String.class, emailId);
+        String verify = jdbcTemplate.queryForObject("select otp from forgotpasswords where emailId=?", String.class, emailId);
         System.out.println(verify);
         System.out.println(otp);
         if (otp.equals(verify)) {
@@ -117,7 +117,7 @@ public class EmailService implements EmailServices
             mailMessage.setText(message);
 
             LocalDate date = LocalDate.now();
-            String query = "insert into CandidatesInvites(fromEmail,candidateName,designation,mobileNumber,location,jobDetails,candidateEmail,date) values(?,?,?,?,?,?,?,?)";
+            String query = "insert into candidatesinvites(fromEmail,candidateName,designation,mobileNumber,location,jobDetails,candidateEmail,date) values(?,?,?,?,?,?,?,?)";
             jdbcTemplate.update(query,memberService.getUserNameFromRequest(request),invites.getCandidateName(),invites.getDesignation(),invites.getMobileNumber(),invites.getLocation(),invites.getJobDetails(),invites.getCandidateEmail(),date);
             javaMailSender.send(mailMessage);
             return true;
@@ -136,11 +136,11 @@ public class EmailService implements EmailServices
         String subject = "Invite from Robosoft Technologies";
         String message = "Inviting to join us as a intern.";
 
-        String query = "select * from CandidatesInvites where candidateInviteId=?";
+        String query = "select * from candidatesinvites where candidateInviteId=?";
         CandidateInvite invites = jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(CandidateInvite.class), inviteId);
         try
         {
-            String check = "select designation from CandidatesInvites where candidateInviteId=? and fromEmail=?";
+            String check = "select designation from candidatesinvites where candidateInviteId=? and fromEmail=?";
             jdbcTemplate.queryForObject(check, String.class,inviteId, currentUser);
 
             SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -151,9 +151,9 @@ public class EmailService implements EmailServices
             mailMessage.setText(message);
 
             LocalDate date = LocalDate.now();
-            String inviteQuery = "insert into CandidatesInvites(fromEmail,candidateName,designation,mobileNumber,location,jobDetails,candidateEmail,date) values(?,?,?,?,?,?,?,?)";
+            String inviteQuery = "insert into candidatesinvites(fromEmail,candidateName,designation,mobileNumber,location,jobDetails,candidateEmail,date) values(?,?,?,?,?,?,?,?)";
             jdbcTemplate.update(inviteQuery, currentUser, invites.getCandidateName(), invites.getDesignation(), invites.getMobileNumber(), invites.getLocation(), invites.getJobDetails(), invites.getCandidateEmail(), date);
-            String softDelete = "update CandidatesInvites set deleted = 1 where candidateInviteId= ?";
+            String softDelete = "update candidatesinvites set deleted = 1 where candidateInviteId= ?";
             jdbcTemplate.update(softDelete, inviteId);
             javaMailSender.send(mailMessage);
             return true;
