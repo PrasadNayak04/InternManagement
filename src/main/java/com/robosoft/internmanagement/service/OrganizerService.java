@@ -3,7 +3,6 @@ package com.robosoft.internmanagement.service;
 import com.robosoft.internmanagement.model.AssignBoardPage;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +17,22 @@ public class OrganizerService implements OrganizerServices
     @Autowired
     private MemberService memberService;
 
+    @Autowired
+    private CandidateService candidateService;
+
     public String takeInterview(AssignBoard board, HttpServletRequest request){
         if(!(memberService.getUserNameFromRequest(request).equals(board.getOrganizerEmail()))){
             return "You can only take interviews which are assigned to you.";
         }
         try{
+            AssignBoardPage assignBoard = memberService.getAssignBoardPageDetails(board);
+
+            if (!candidateService.isVacantPosition(assignBoard.getDesignation())){
+                return "Designation status closed";
+            }
+
             String query = "select status from assignboard where candidateId=? and organizerEmail=? and status=? and deleted = 0";
             jdbcTemplate.queryForObject(query,String.class,board.getCandidateId(),board.getOrganizerEmail(),"NEW");
-
-            AssignBoardPage assignBoard = memberService.getAssignBoardPageDetails(board);
 
             if(board.getStatus().equalsIgnoreCase("SHORTLISTED")){
 

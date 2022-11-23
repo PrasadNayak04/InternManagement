@@ -39,5 +39,6 @@ public class AuthorityController
     {
         return authorityServices.assignRecruiter(assignBoard);
     }
+
 }
 

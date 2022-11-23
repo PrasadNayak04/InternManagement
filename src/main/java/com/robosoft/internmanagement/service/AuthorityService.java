@@ -5,8 +5,6 @@ import com.robosoft.internmanagement.model.MemberModel;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Technology;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.integration.IntegrationAutoConfiguration;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -78,30 +76,30 @@ public class AuthorityService implements AuthorityServices
 
     public String assignRecruiter(AssignBoard assignBoard)
     {
-        query = "select position from candidatesprofile where candidateId = ? and deleted = 0";
-        String designation = jdbcTemplate.queryForObject(query, String.class, assignBoard.getCandidateId());
+        try {
+            query = "select position from candidatesprofile where candidateId = ? and deleted = 0";
+            String designation = jdbcTemplate.queryForObject(query, String.class, assignBoard.getCandidateId());
 
-        if(!candidateService.isVacantPosition(designation)){
-            return "Cannot assign since position is closed";
-        }
-        try
-        {
-            query = "select name from membersprofile where emailId=? and position=?";
-            jdbcTemplate.queryForObject(query, String.class,assignBoard.getRecruiterEmail(),"RECRUITER");
-
+            if (!candidateService.isVacantPosition(designation)) {
+                return "Cannot assign since position is closed";
+            }
             try {
-                query = "insert into assignboard(candidateId,recruiterEmail) values(?,?)";
-                jdbcTemplate.update(query,assignBoard.getCandidateId(),assignBoard.getRecruiterEmail());
-                return "Recruiter Assigned Successfully";
+                query = "select name from membersprofile where emailId=? and position=?";
+                jdbcTemplate.queryForObject(query, String.class, assignBoard.getRecruiterEmail(), "RECRUITER");
+
+                try {
+                    query = "insert into assignboard(candidateId,recruiterEmail) values(?,?)";
+                    jdbcTemplate.update(query, assignBoard.getCandidateId(), assignBoard.getRecruiterEmail());
+                    return "Recruiter Assigned Successfully";
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                    return "Applicant is assigned already";
+                }
+            } catch (Exception e) {
+                return "Select correct Recruiter to assign";
             }
-            catch (Exception e1)
-            {
-                e1.printStackTrace();
-                return "Applicant is assigned already";
-            }
-        }
-        catch (Exception e) {
-            return "Select correct Recruiter to assign";
+        } catch (Exception e) {
+            return "Invalid information";
         }
     }
 

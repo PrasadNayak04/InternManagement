@@ -28,6 +28,30 @@ public class RecruiterController
     @Autowired
     private MemberServices memberServices;
 
+    @PatchMapping("reject-candidate/{candidateId}")
+    public ResponseEntity<?> rejectCandidate(@PathVariable int candidateId, HttpServletRequest request){
+        if(recruiterServices.rejectAssignedCandidate(candidateId,request)){
+            return ResponseEntity.ok().body("added to rejected CV");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Failed");
+    }
+
+    @PatchMapping("recruit-candidate/{candidateId}")
+    public ResponseEntity<?> reRecruitCandidate(@PathVariable int candidateId, HttpServletRequest request){
+        if(recruiterServices.reRecruitCandidate(candidateId,request)){
+            return ResponseEntity.ok().body("Assignboard status updated");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Failed");
+    }
+
+    @PatchMapping("delete-candidate/{candidateId}")
+    public ResponseEntity<?> deleteCandidate(@PathVariable int candidateId, HttpServletRequest request){
+        if(recruiterServices.deleteCandidate(candidateId,request)){
+            return ResponseEntity.ok().body("Candidate deleted");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Failed");
+    }
+
     @PostMapping("/candidate-invitation")
     public ResponseEntity<String> invites(@ModelAttribute CandidateInvite invites, HttpServletRequest request)
     {

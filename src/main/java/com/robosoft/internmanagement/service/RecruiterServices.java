@@ -12,6 +12,12 @@ import java.util.List;
 
 public interface RecruiterServices
 {
+
+    boolean rejectAssignedCandidate(int candidateId, HttpServletRequest request);
+
+    boolean reRecruitCandidate(int candidateId, HttpServletRequest request);
+
+    boolean deleteCandidate(int candidateId, HttpServletRequest request);
     List<?> getAllOrganizers();
 
     List<?> getOrganizer(Integer limit, HttpServletRequest request);

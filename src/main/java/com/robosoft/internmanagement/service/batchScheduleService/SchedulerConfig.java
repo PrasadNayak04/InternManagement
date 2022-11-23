@@ -53,6 +53,6 @@ public class SchedulerConfig {
                     return eventReminder;
 
                 });
-
     }
+
 }
