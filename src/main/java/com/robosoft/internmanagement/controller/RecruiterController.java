@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/intern-management/recruiter")
+@RequestMapping("/recruiter")
 public class RecruiterController
 {
     @Autowired

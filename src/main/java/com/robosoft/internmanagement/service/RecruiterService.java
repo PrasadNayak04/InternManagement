@@ -3,6 +3,7 @@ package com.robosoft.internmanagement.service;
 import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class RecruiterService implements RecruiterServices
@@ -39,54 +41,66 @@ public class RecruiterService implements RecruiterServices
         String status = "NEW";
         List<Organizer> organizerList = new ArrayList<>();
         query = "select name, emailId, photoUrl from membersprofile inner join assignboard on emailId = organizerEmail where recruiterEmail = ? and status=? group by organizerEmail";
+            jdbcTemplate.query(query,
+                    (resultSet, no) -> {
+                        Organizer organizer = new Organizer();
+                        organizer.setName(resultSet.getString(1));
+                        organizer.setPhotoUrl(resultSet.getString(3));
+                        organizer.setInterviews(getInterviewsCount(resultSet.getString(2), memberService.getUserNameFromRequest(request)));
+                        organizerList.add(organizer);
+                        return organizer;
+                    }, memberService.getUserNameFromRequest(request), status);
 
-        jdbcTemplate.query(query,
-                (resultSet, no) -> {
-                    Organizer organizer = new Organizer();
-                    organizer.setName(resultSet.getString(1));
-                    organizer.setPhotoUrl(resultSet.getString(3));
-                    organizer.setInterviews(getInterviewsCount(resultSet.getString(2), memberService.getUserNameFromRequest(request)));
-                    organizerList.add(organizer);
-                    return organizer;
-                }, memberService.getUserNameFromRequest(request), status);
+            Collections.sort(organizerList);
 
-        Collections.sort(organizerList);
-
-        if(limit == null){
-            limit = organizerList.size();
-        }
-        return organizerList.subList(0, limit);
+            if (limit == null) {
+                limit = organizerList.size();
+            }
+            if (organizerList.size() >= limit)
+                return organizerList.subList(0, limit);
+            return Arrays.asList(organizerList.subList(0, organizerList.size()));
     }
 
     public int getInterviewsCount(String organizerEmail, String recruiterEmail){
-        query = "select count(*) from assignboard where organizerEmail = ? and recruiterEmail = ?";
-        return jdbcTemplate.queryForObject(query, Integer.class, organizerEmail, recruiterEmail);
+        try {
+            query = "select count(*) from assignboard where organizerEmail = ? and recruiterEmail = ?";
+            return jdbcTemplate.queryForObject(query, Integer.class, organizerEmail, recruiterEmail);
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public Summary getSummary(Date date, HttpServletRequest request)
     {
         String currentUser = memberService.getUserNameFromRequest(request);
-
-        Summary summary = new Summary();
-        query = "select count(*) from assignboard where month(assignDate)=? and year(assignDate)= ? and status = ? and recruiterEmail=?";
-        int shortlisted = jdbcTemplate.queryForObject(query, Integer.class,date.toLocalDate().getMonthValue(),date.toLocalDate().getYear(),"SHORTLISTED", currentUser);
-        summary.setShortlisted(shortlisted);
-        query = "select count(*) from assignboard where month(assignDate)=? and year(assignDate)=? and status=? and recruiterEmail=?";
-        int onHold = jdbcTemplate.queryForObject(query, Integer.class,date.toLocalDate().getMonthValue(),date.toLocalDate().getYear(),"NEW", currentUser);
-        summary.setOnHold(onHold);
-        query = "select count(*) from assignboard where month(assignDate)=? and year(assignDate)=? and status=? and recruiterEmail=?";
-        int rejected = jdbcTemplate.queryForObject(query, Integer.class,date.toLocalDate().getMonthValue(),date.toLocalDate().getYear(),"REJECTED", currentUser);
-        summary.setRejected(rejected);
-        int assigned = jdbcTemplate.queryForObject(query, Integer.class,date.toLocalDate().getMonthValue(),date.toLocalDate().getYear(), "ASSIGNED", currentUser);
-        int applications=shortlisted + onHold + rejected + assigned;
-        summary.setApplications(applications);
-        return summary;
+        try {
+            Summary summary = new Summary();
+            query = "select count(*) from assignboard where month(assignDate)=? and year(assignDate)= ? and status = ? and recruiterEmail=?";
+            int shortlisted = jdbcTemplate.queryForObject(query, Integer.class, date.toLocalDate().getMonthValue(), date.toLocalDate().getYear(), "SHORTLISTED", currentUser);
+            summary.setShortlisted(shortlisted);
+            query = "select count(*) from assignboard where month(assignDate)=? and year(assignDate)=? and status=? and recruiterEmail=?";
+            int onHold = jdbcTemplate.queryForObject(query, Integer.class, date.toLocalDate().getMonthValue(), date.toLocalDate().getYear(), "NEW", currentUser);
+            summary.setOnHold(onHold);
+            query = "select count(*) from assignboard where month(assignDate)=? and year(assignDate)=? and status=? and recruiterEmail=?";
+            int rejected = jdbcTemplate.queryForObject(query, Integer.class, date.toLocalDate().getMonthValue(), date.toLocalDate().getYear(), "REJECTED", currentUser);
+            summary.setRejected(rejected);
+            int assigned = jdbcTemplate.queryForObject(query, Integer.class, date.toLocalDate().getMonthValue(), date.toLocalDate().getYear(), "ASSIGNED", currentUser);
+            int applications = shortlisted + onHold + rejected + assigned;
+            summary.setApplications(applications);
+            return summary;
+        } catch (Exception e) {
+            return new Summary(0,0,0,0);
+        }
     }
 
     public int cvCount(HttpServletRequest request)
     {
-        query = "select count(candidateId) from assignboard where recruiterEmail=? and organizerEmail is null and deleted = 0";
-        return jdbcTemplate.queryForObject(query, Integer.class, memberService.getUserNameFromRequest(request));
+        try {
+            query = "select count(candidateId) from assignboard where recruiterEmail=? and organizerEmail is null and deleted = 0";
+            return jdbcTemplate.queryForObject(query, Integer.class, memberService.getUserNameFromRequest(request));
+        } catch (Exception e) {
+            return 0;
+        }
     }
 
     public List<?> cvAnalysisPage(Date date, int pageNo, int limit)
@@ -98,30 +112,34 @@ public class RecruiterService implements RecruiterServices
 
         int offset = (pageNo - 1) * limit;
         int totalCount = 0;
-        if(pageNo == 1){
-            query = "select count(distinct applications.designation) from applications,technologies where applications.designation = technologies.designation and date=? and applications.deleted = 0 and technologies.deleted = 0 group by applications.designation";
-            totalCount = jdbcTemplate.queryForObject(query, Integer.class, date);
+        try {
+            if (pageNo == 1) {
+                query = "select count(distinct applications.designation) from applications,technologies where applications.designation = technologies.designation and date=? and applications.deleted = 0 and technologies.deleted = 0 group by applications.designation";
+                totalCount = jdbcTemplate.queryForObject(query, Integer.class, date);
+            }
+
+            query = "select applications.designation,count(applications.designation),date,status from applications,technologies where applications.designation = technologies.designation and date=? and applications.deleted = 0 and technologies.deleted = 0 group by applications.designation limit ?, ?";
+            List<CvAnalysis> cvAnalyses = jdbcTemplate.query(query,
+                    (resultSet, no) -> {
+                        CvAnalysis cvAnalysis = new CvAnalysis();
+
+                        cvAnalysis.setDesignation(resultSet.getString(1));
+                        cvAnalysis.setApplicants(resultSet.getInt(2));
+                        cvAnalysis.setReceivedDate(resultSet.getDate(3));
+                        cvAnalysis.setStatus(resultSet.getString(4));
+                        cvAnalysis.setLocations(getLocationsByDesignation(resultSet.getString(1)));
+
+                        cvAnalysisList.add(cvAnalysis);
+                        return cvAnalysis;
+                    }, date, offset, limit);
+
+            if (pageNo == 1) {
+                return Arrays.asList(totalCount, cvAnalyses.size(), cvAnalyses);
+            }
+            return Arrays.asList(cvAnalyses.size(), cvAnalyses);
+        }catch (Exception e) {
+            return Arrays.asList();
         }
-
-        query = "select applications.designation,count(applications.designation),date,status from applications,technologies where applications.designation = technologies.designation and date=? and applications.deleted = 0 and technologies.deleted = 0 group by applications.designation limit ?, ?";
-        List<CvAnalysis> cvAnalyses = jdbcTemplate.query(query,
-                (resultSet, no) -> {
-                    CvAnalysis cvAnalysis = new CvAnalysis();
-
-                    cvAnalysis.setDesignation(resultSet.getString(1));
-                    cvAnalysis.setApplicants(resultSet.getInt(2));
-                    cvAnalysis.setReceivedDate(resultSet.getDate(3));
-                    cvAnalysis.setStatus(resultSet.getString(4));
-                    cvAnalysis.setLocations(getLocationsByDesignation(resultSet.getString(1)));
-
-                    cvAnalysisList.add(cvAnalysis);
-                    return cvAnalysis;
-                }, date, offset, limit);
-
-        if(pageNo ==1) {
-            return Arrays.asList(totalCount, cvAnalyses.size(), cvAnalyses);
-        }
-        return Arrays.asList(cvAnalyses.size(), cvAnalyses);
 
     }
 
@@ -202,12 +220,52 @@ public class RecruiterService implements RecruiterServices
     }
 
     public List<TopTechnology> getTopTechnologies(String designation) {
-        query = "select technologies.designation,locations.location from technologies left join locations using(designation) left join applications using(designation) where applications.designation != ? and technologies.deleted = 0 and locations.deleted = 0 and applications.deleted = 0 group by technologies.designation order by count(applications.designation) desc limit 5";
-        List<TopTechnology> topTechnologies = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(TopTechnology.class),designation);
-        List<String> locations = getLocationsByDesignation(designation);
-        TopTechnology technologies = new TopTechnology(designation,locations);
-        topTechnologies.add(0,technologies);
-        return topTechnologies;
+        try {
+            List<TopTechnology> topTechnologies = new ArrayList<>();
+            query = "select technologies.designation from technologies left join applications using(designation) where applications.designation != ? and applications.deleted = 0 group by technologies.designation order by count(applications.designation) desc limit 5";
+            List<String> topTechnologiesNames = jdbcTemplate.queryForList(query, String.class, designation);
+            topTechnologies.addAll(setTopTechnologyLocations(topTechnologiesNames));
+            System.out.println(topTechnologies.size());
+           if (topTechnologies.size() < 5) {
+               String parameter = "'...'";
+               int required = 5;
+               if(topTechnologies.size() > 0) {
+                   String parameter2 = "";
+                    required = 5 - topTechnologies.size();
+                   List<String> tech = topTechnologies.stream().map(e -> e.getDesignation()).collect(Collectors.toList());
+                   for (String i : tech)
+                       parameter2 += "'" + i + "',";
+                   parameter = parameter2.substring(0,parameter.length()-1);
+               }
+
+               System.out.println(parameter);
+                topTechnologiesNames.clear();
+                query = "select technologies.designation from technologies where technologies.designation not in (" + parameter + ") and technologies.designation != ? and technologies.deleted = 0 limit ?";
+                topTechnologiesNames.addAll(jdbcTemplate.queryForList(query, String.class,designation, required));
+                topTechnologies.addAll(setTopTechnologyLocations(topTechnologiesNames));
+            }
+            List<String> locations = getLocationsByDesignation(designation);
+            TopTechnology technologies = new TopTechnology(designation, locations);
+            topTechnologies.add(0, technologies);
+            return topTechnologies;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+    public List<TopTechnology> setTopTechnologyLocations(List<String> technologyNames){
+        try {
+            System.out.println(technologyNames.size());
+            List<TopTechnology> topTechnologies = new ArrayList<>();
+            for (String technology : technologyNames) {
+                List<String> locations = getLocationsByDesignation(technology);
+                TopTechnology technologies = new TopTechnology(technology, locations);
+                topTechnologies.add(technologies);
+            }
+            return topTechnologies;
+        } catch (Exception e) {
+            return Arrays.asList();
+        }
     }
 
     public String getLastJobPosition(int candidateId) {

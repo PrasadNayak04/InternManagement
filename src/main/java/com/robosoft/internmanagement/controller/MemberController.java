@@ -22,7 +22,7 @@ import java.nio.file.Paths;
 
 @RestController
 @CrossOrigin
-@RequestMapping("/intern-management/member")
+@RequestMapping("/member")
 public class MemberController {
 
     @Autowired

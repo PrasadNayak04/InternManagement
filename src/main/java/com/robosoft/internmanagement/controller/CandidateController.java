@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/intern-management/candidate")
+@RequestMapping("/candidate")
 public class CandidateController {
 
     @Autowired

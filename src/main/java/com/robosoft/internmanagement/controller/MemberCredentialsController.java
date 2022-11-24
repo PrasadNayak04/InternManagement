@@ -19,8 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.servlet.http.HttpServletRequest;
 
 @RestController
-@RequestMapping("/intern-management/member-login")
-public class MemberLoginController {
+@RequestMapping("/member-credentials")
+public class MemberCredentialsController {
 
     @Autowired
     private JwtUserDetailsService userDetailsService;
