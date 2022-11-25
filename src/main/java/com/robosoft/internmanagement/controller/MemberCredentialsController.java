@@ -58,9 +58,9 @@ public class MemberCredentialsController {
         boolean mailSent = emailServices.sendEmail(password);
 
         if(mailSent){
-            return ResponseEntity.ok().body("true");
+            return ResponseEntity.ok("true");
         }else{
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("false");
+            return ResponseEntity.ok("false");
         }
     }
 
