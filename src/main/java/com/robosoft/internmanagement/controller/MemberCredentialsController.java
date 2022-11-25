@@ -38,7 +38,7 @@ public class MemberCredentialsController {
 
 
     @PostMapping(value = "/register")
-    public String registerMember(@ModelAttribute MemberProfile memberProfile, HttpServletRequest request){
+    public String registerMember(@RequestBody MemberProfile memberProfile, HttpServletRequest request){
         return memberServices.registerMember(memberProfile, request);
     }
 
