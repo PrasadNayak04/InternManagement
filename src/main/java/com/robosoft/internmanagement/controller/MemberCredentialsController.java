@@ -75,9 +75,9 @@ public class MemberCredentialsController {
     }
 
     @PutMapping(value = "/otp-verification")
-    public String verify(@RequestBody ForgotPassword password)
+    public ResponseEntity<?> verify(@RequestBody ForgotPassword password)
     {
-        return emailServices.verification(password);
+        return ResponseEntity.ok(emailServices.verification(password));
     }
 
     @PatchMapping("/password-update")
