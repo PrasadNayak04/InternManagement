@@ -1,6 +1,7 @@
 package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.modelAttributes.CandidateInvite;
+import com.robosoft.internmanagement.modelAttributes.ForgotPassword;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -29,7 +30,7 @@ public class EmailService implements EmailServices
     @Value("${spring.mail.username}")
     private String sender;
 
-    public boolean sendEmail(String toEmail)
+    public boolean sendEmail(ForgotPassword password)
     {
 
         boolean flag = false;
@@ -53,7 +54,7 @@ public class EmailService implements EmailServices
             SimpleMailMessage mailMessage = new SimpleMailMessage();
 
             mailMessage.setFrom(sender);
-            mailMessage.setTo(toEmail);
+            mailMessage.setTo(password.getEmailId());
             mailMessage.setSubject(subject);
             mailMessage.setText(message);
 
@@ -61,13 +62,13 @@ public class EmailService implements EmailServices
             String OTP=String.valueOf(otp);
             try
             {
-                jdbcTemplate.queryForObject("select emailId from member where emailId=?", String.class,toEmail);
-                jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,toEmail);
+                jdbcTemplate.queryForObject("select emailId from member where emailId=?", String.class,password.getEmailId());
+                jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,password.getEmailId());
                 return flag = true;
             }
             catch (Exception e)
             {
-                return flag = insert(toEmail,OTP);
+                return flag = insert(password.getEmailId(),OTP);
             }
 
         }
@@ -89,14 +90,14 @@ public class EmailService implements EmailServices
         }
     }
 
-    public String verification(String emailId, String otp)
+    public String verification(ForgotPassword password)
     {
         try {
             String query = "select now()-forgotpasswords.time from forgotpasswords where emailid=?";
-            long expireTime = jdbcTemplate.queryForObject(query, Long.class, emailId);
-            String verifyOtp = jdbcTemplate.queryForObject("select otp from forgotpasswords where emailId=?", String.class, emailId);
+            long expireTime = jdbcTemplate.queryForObject(query, Long.class, password.getEmailId());
+            String verifyOtp = jdbcTemplate.queryForObject("select otp from forgotpasswords where emailId=?", String.class, password.getEmailId());
 
-            if (otp.equals(verifyOtp) && expireTime < 120) {
+            if (password.getOtp().equals(verifyOtp) && expireTime < 120) {
                 return "Done";
             }
             return "Invalid OTP/Time Expired";

@@ -1,5 +1,6 @@
 package com.robosoft.internmanagement.controller;
 
+import com.robosoft.internmanagement.modelAttributes.ForgotPassword;
 import com.robosoft.internmanagement.modelAttributes.Member;
 import com.robosoft.internmanagement.modelAttributes.MemberProfile;
 import com.robosoft.internmanagement.service.EmailServices;
@@ -53,20 +54,20 @@ public class MemberCredentialsController {
     }
 
     @PostMapping("/otp")
-    public ResponseEntity<?> sendMail(@RequestParam String toEmail){
-        boolean mailSent = emailServices.sendEmail(toEmail);
+    public ResponseEntity<?> sendMail(@RequestBody ForgotPassword password){
+        boolean mailSent = emailServices.sendEmail(password);
 
         if(mailSent){
-            return ResponseEntity.ok().body("Otp has been sent to the email \"" + toEmail + "\"");
+            return ResponseEntity.ok().body("Otp has been sent to the email \"" + password.getEmailId() + "\"");
         }else{
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Please provide valid email");
         }
     }
 
     @PutMapping(value = "/otp-verification", consumes= "multipart/form-data")
-    public String verify(@RequestParam String emailId,@RequestParam String otp)
+    public String verify(@RequestBody ForgotPassword password)
     {
-        return emailServices.verification(emailId,otp);
+        return emailServices.verification(password);
     }
 
     @PatchMapping("/password-update")

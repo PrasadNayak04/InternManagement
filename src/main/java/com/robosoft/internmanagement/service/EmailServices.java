@@ -1,16 +1,17 @@
 package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.modelAttributes.CandidateInvite;
+import com.robosoft.internmanagement.modelAttributes.ForgotPassword;
 
 import javax.servlet.http.HttpServletRequest;
 
 public interface EmailServices
 {
-    boolean sendEmail(String toEmail);
+    boolean sendEmail(ForgotPassword password);
 
     boolean insert(String emailId,String code);
 
-    String verification(String emailId,String otp);
+    String verification(ForgotPassword password);
 
     boolean sendInviteEmail(CandidateInvite invites, HttpServletRequest request);
 
