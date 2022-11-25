@@ -18,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/member-credentials", produces = "application/json")
+@RequestMapping(value = "/member-credentials")
 public class MemberCredentialsController {
 
     @Autowired
