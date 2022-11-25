@@ -64,7 +64,17 @@ public class MemberCredentialsController {
         }
     }
 
-    @PutMapping(value = "/otp-verification", consumes= "multipart/form-data")
+    @PostMapping(value = "/email-verification")
+    public ResponseEntity<?> verifyMail(@RequestBody ForgotPassword password){
+        boolean mailSent = emailServices.sendRegistrationOtp(password);
+        if(mailSent){
+            return ResponseEntity.ok("true");
+        }else{
+            return ResponseEntity.ok("false");
+        }
+    }
+
+    @PutMapping(value = "/otp-verification")
     public String verify(@RequestBody ForgotPassword password)
     {
         return emailServices.verification(password);

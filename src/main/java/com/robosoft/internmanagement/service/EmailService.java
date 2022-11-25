@@ -65,12 +65,12 @@ public class EmailService implements EmailServices
             {
                 jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,password.getEmailId());
                 jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,password.getEmailId());
-                return flag = true;
+                return true;
             }
             catch (Exception e)
             {
                 insert(password.getEmailId(),OTP);
-                return flag = true;
+                return true;
             }
 
         }
@@ -79,6 +79,50 @@ public class EmailService implements EmailServices
             return false;
         }
 
+    }
+
+    public boolean sendRegistrationOtp(ForgotPassword password)
+    {
+        String subject = "OTP from Intern Management";
+
+        Random random = new Random();
+        int otp;
+
+        do
+        {
+            otp = random.nextInt(9999);
+        }
+        while(String.valueOf(otp).length() < 3);
+
+        String message = "Please use OTP " + otp + " for your account registration";
+
+        try
+        {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+            mailMessage.setFrom(sender);
+            mailMessage.setTo(password.getEmailId());
+            mailMessage.setSubject(subject);
+            mailMessage.setText(message);
+
+            String OTP=String.valueOf(otp);
+            try
+            {
+                jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,password.getEmailId());
+                jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,password.getEmailId());
+                javaMailSender.send(mailMessage);
+                return true;
+            }
+            catch (Exception e)
+            {
+                insert(password.getEmailId(),OTP);
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
 
     public boolean insert(String emailId,String code)

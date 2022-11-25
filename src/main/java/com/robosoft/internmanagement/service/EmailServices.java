@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public interface EmailServices
 {
+    boolean sendRegistrationOtp(ForgotPassword password);
     boolean sendEmail(ForgotPassword password);
 
     boolean insert(String emailId,String code);
