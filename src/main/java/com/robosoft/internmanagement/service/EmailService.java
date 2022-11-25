@@ -44,7 +44,7 @@ public class EmailService implements EmailServices
         {
             otp = random.nextInt(9999);
         }
-        while(String.valueOf(otp).length() < 3);
+        while(String.valueOf(otp).length() < 4);
 
         String message = "Please use OTP " + otp + " for your account password reset request";
 
@@ -92,7 +92,7 @@ public class EmailService implements EmailServices
         {
             otp = random.nextInt(9999);
         }
-        while(String.valueOf(otp).length() < 3);
+        while(String.valueOf(otp).length() < 4);
 
         String message = "Please use OTP " + otp + " for your account registration";
 
