@@ -15,6 +15,7 @@ import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/recruiter")
 public class RecruiterController
