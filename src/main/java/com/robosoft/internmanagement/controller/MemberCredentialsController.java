@@ -58,9 +58,9 @@ public class MemberCredentialsController {
         boolean mailSent = emailServices.sendEmail(password);
 
         if(mailSent){
-            return ResponseEntity.ok().body("Otp has been sent to the email \"" + password.getEmailId() + "\"");
+            return ResponseEntity.ok().body("true");
         }else{
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Please provide valid email");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("false");
         }
     }
 
