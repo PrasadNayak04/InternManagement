@@ -50,7 +50,7 @@ public class MemberCredentialsController {
             final String jwtToken = tokenManager.generateJwtToken(userDetails);
             return ResponseEntity.ok(jwtToken);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("false");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("false");
         }
     }
 
