@@ -48,7 +48,7 @@ public class MemberCredentialsController {
             final String jwtToken = tokenManager.generateJwtToken(userDetails);
             return ResponseEntity.ok(jwtToken);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("false");
+            return ResponseEntity.ok("false");
         }
     }
 
@@ -63,7 +63,7 @@ public class MemberCredentialsController {
         }
     }
 
-    @PutMapping("/otp-verification")
+    @PutMapping(value = "/otp-verification", consumes= "multipart/form-data")
     public String verify(@RequestParam String emailId,@RequestParam String otp)
     {
         return emailServices.verification(emailId,otp);
