@@ -50,7 +50,7 @@ public class MemberCredentialsController {
             e.printStackTrace();
             throw new Exception("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().body(false);
+            return ResponseEntity.badRequest().body("false");
         }
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmailId());
