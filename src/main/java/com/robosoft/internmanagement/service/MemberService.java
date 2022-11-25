@@ -13,6 +13,7 @@ import com.robosoft.internmanagement.service.jwtSecurity.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
@@ -86,11 +87,14 @@ public class MemberService implements MemberServices
             if(member.getPassword().equals("") || member.getPassword().contains(" ")){
                 throw new Exception("Empty password field.");
             }
-            //current password
             query = "select password from members where emailId = ?";
             String password = jdbcTemplate.queryForObject(query, String.class, member.getEmailId());
 
-            //change password
+            BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+            if(encoder.matches(member.getPassword(), password)){
+                return -1;
+            }
+
             query = "update members set password = ? where emailId = ?";
             jdbcTemplate.update(query, encodePassword(member.getPassword()), member.getEmailId());
             String message = "You have changed your password successfully";
@@ -98,13 +102,14 @@ public class MemberService implements MemberServices
                 query = "insert into notifications(emailId, message, type) values (?,?,?)";
                 jdbcTemplate.update(query, member.getEmailId(), message, "OTHERS");
             }catch(Exception exception){
-                //if insertion into notification  fails
                 query = "update members set password = ? where emailId = ?";
                 jdbcTemplate.update(query, password, member.getEmailId());
+                exception.printStackTrace();
                 return 0;
             }
             return 1;
         }catch (Exception e){
+            e.printStackTrace();
             return 0;
         }
     }

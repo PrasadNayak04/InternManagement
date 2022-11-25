@@ -78,9 +78,10 @@ public class MemberCredentialsController {
     @PatchMapping("/password-update")
     public ResponseEntity<?> updatePassword(@ModelAttribute Member member){
         int updateStatus = memberServices.updatePassword(member);
-        if(updateStatus == 1){
+        if(updateStatus == 1)
             return ResponseEntity.ok("Password updated successfully");
-        }
+        else if (updateStatus == -1)
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("Failed. New password should be different from your previous password.");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to update password");
     }
 
