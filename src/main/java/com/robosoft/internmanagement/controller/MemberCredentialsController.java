@@ -46,16 +46,12 @@ public class MemberCredentialsController {
     public ResponseEntity<?> createToken(@RequestBody Member member, HttpServletRequest request) throws Exception {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(member.getEmailId(), member.getPassword()));
-        } catch (DisabledException e) {
-            e.printStackTrace();
-            throw new Exception("USER_DISABLED", e);
-        } catch (BadCredentialsException e) {
+            final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmailId());
+            final String jwtToken = tokenManager.generateJwtToken(userDetails);
+            return ResponseEntity.ok(jwtToken);
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body("false");
         }
-
-        final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmailId());
-        final String jwtToken = tokenManager.generateJwtToken(userDetails);
-        return ResponseEntity.ok(jwtToken);
     }
 
     @PostMapping("/otp")
