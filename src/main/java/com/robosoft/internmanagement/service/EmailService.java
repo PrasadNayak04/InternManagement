@@ -50,6 +50,7 @@ public class EmailService implements EmailServices
 
         try
         {
+            jdbcTemplate.queryForObject("select emailId from members where emailId=?", String.class,password.getEmailId());
 
             SimpleMailMessage mailMessage = new SimpleMailMessage();
 
@@ -62,7 +63,7 @@ public class EmailService implements EmailServices
             String OTP=String.valueOf(otp);
             try
             {
-                jdbcTemplate.queryForObject("select emailId from member where emailId=?", String.class,password.getEmailId());
+                jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,password.getEmailId());
                 jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,password.getEmailId());
                 return flag = true;
             }
@@ -75,7 +76,6 @@ public class EmailService implements EmailServices
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             return false;
         }
 
