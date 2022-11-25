@@ -38,7 +38,7 @@ public class MemberCredentialsController {
 
 
     @PostMapping("/register")
-    public String registerMember(@ModelAttribute MemberProfile memberProfile, HttpServletRequest request){
+    public String registerMember(@RequestBody MemberProfile memberProfile, HttpServletRequest request){
         return memberServices.registerMember(memberProfile, request);
     }
 
@@ -50,7 +50,7 @@ public class MemberCredentialsController {
             final String jwtToken = tokenManager.generateJwtToken(userDetails);
             return ResponseEntity.ok(jwtToken);
         } catch (Exception e) {
-            return ResponseEntity.ok("False");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("false");
         }
     }
 
