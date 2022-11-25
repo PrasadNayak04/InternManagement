@@ -37,8 +37,8 @@ public class MemberCredentialsController {
     private EmailServices emailServices;
 
 
-    @PostMapping(value = "/register" ,produces =  "application/json")
-    public String registerMember(@RequestBody MemberProfile memberProfile, HttpServletRequest request){
+    @PostMapping(value = "/register")
+    public String registerMember(@ModelAttribute MemberProfile memberProfile, HttpServletRequest request){
         return memberServices.registerMember(memberProfile, request);
     }
 

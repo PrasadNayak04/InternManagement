@@ -21,9 +21,8 @@ public class StorageService implements StorageServices
 
     public String singleFileUpload(MultipartFile file, String email, HttpServletRequest request, String position) throws Exception {
         String fileUrl = null;
-
         try {
-            if (file.isEmpty() && position.equalsIgnoreCase("MEMBER")) {
+            if (position.equalsIgnoreCase("MEMBER")) {
                 return "http://localhost:8080/intern-management/fetch/default@gmail.com/default.png";
             }
             else if (file.isEmpty() && position.equalsIgnoreCase("CANDIDATE")) {
