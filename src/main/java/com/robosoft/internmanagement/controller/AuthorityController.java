@@ -14,7 +14,7 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/authority")
+@RequestMapping(value = "/authority", produces = "application/json")
 public class AuthorityController
 {
     @Autowired

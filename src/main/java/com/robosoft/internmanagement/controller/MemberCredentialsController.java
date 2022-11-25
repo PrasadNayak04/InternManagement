@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-@CrossOrigin
 @RestController
-@RequestMapping("/member-credentials")
+@CrossOrigin
+@RequestMapping(value = "/member-credentials" , produces = "application/json")
 public class MemberCredentialsController {
 
     @Autowired
@@ -43,15 +43,14 @@ public class MemberCredentialsController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> createToken(@ModelAttribute Member member, HttpServletRequest request) throws Exception {
+    public ResponseEntity<?> createToken(@RequestBody Member member, HttpServletRequest request) throws Exception {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(member.getEmailId(), member.getPassword()));
         } catch (DisabledException e) {
             e.printStackTrace();
             throw new Exception("USER_DISABLED", e);
         } catch (BadCredentialsException e) {
-            e.printStackTrace();
-            throw new Exception("INVALID_CREDENTIALS", e);
+            return ResponseEntity.badRequest().body(false);
         }
 
         final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmailId());

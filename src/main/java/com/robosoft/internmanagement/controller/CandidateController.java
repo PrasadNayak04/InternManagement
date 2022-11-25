@@ -9,7 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/candidate")
+@RequestMapping(value = "/candidate", produces = "application/json")
 public class CandidateController {
 
     @Autowired

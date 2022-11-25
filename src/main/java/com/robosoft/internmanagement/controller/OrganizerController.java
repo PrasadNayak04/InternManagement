@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
-@CrossOrigin
 @RestController
-@RequestMapping("/organizer")
+@CrossOrigin
+@RequestMapping(value = "/organizer" , produces = "application/json")
 public class OrganizerController
 {
     @Autowired

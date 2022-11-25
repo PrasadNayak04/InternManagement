@@ -17,7 +17,7 @@ import java.util.Optional;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/recruiter")
+@RequestMapping(value = "/recruiter" , produces = "application/json")
 public class RecruiterController
 {
     @Autowired
