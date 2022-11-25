@@ -68,7 +68,8 @@ public class EmailService implements EmailServices
             }
             catch (Exception e)
             {
-                return flag = insert(password.getEmailId(),OTP);
+                insert(password.getEmailId(),OTP);
+                return flag = true;
             }
 
         }
