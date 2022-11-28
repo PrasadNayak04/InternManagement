@@ -68,7 +68,7 @@ public class MemberCredentialsController {
     public ResponseEntity<?> verifyMail(@RequestBody ForgotPassword password){
         boolean mailSent = emailServices.sendRegistrationOtp(password);
         if(mailSent){
-            return ResponseEntity.ok("true");
+            return ResponseEntity.ok(memberServices.getMemberNameByEmail(password.getEmailId()) + " " + password.getEmailId());
         }else{
             return ResponseEntity.ok("false");
         }
