@@ -37,14 +37,7 @@ public class EmailService implements EmailServices
 
         String subject = "OTP from Intern Management";
 
-        Random random = new Random();
-        int otp;
-
-        do
-        {
-            otp = random.nextInt(9999);
-        }
-        while(String.valueOf(otp).length() < 4);
+        int otp = generateOTP();
 
         String message = "Please use OTP " + otp + " for your account password reset request";
 
@@ -82,23 +75,26 @@ public class EmailService implements EmailServices
 
     }
 
-    public boolean sendRegistrationOtp(ForgotPassword password)
-    {
-        String subject = "OTP from Intern Management";
-
+    public int generateOTP(){
         Random random = new Random();
         int otp;
-
         do
         {
             otp = random.nextInt(9999);
         }
         while(String.valueOf(otp).length() < 4);
+        return otp;
+    }
+
+    public boolean sendRegistrationOtp(ForgotPassword password)
+    {
+        String subject = "OTP from Intern Management";
+
+        int otp = generateOTP();
 
         String message = "Please use OTP " + otp + " for your account registration";
 
         try {
-
             jdbcTemplate.queryForObject("select emailId from members where emailId=?", String.class, password.getEmailId());
             return false;
         }catch (Exception e)
