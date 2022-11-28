@@ -59,16 +59,17 @@ public class EmailService implements EmailServices
             mailMessage.setSubject(subject);
             mailMessage.setText(message);
 
-            javaMailSender.send(mailMessage);
             String OTP=String.valueOf(otp);
             try
             {
                 jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,password.getEmailId());
                 jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,password.getEmailId());
+                javaMailSender.send(mailMessage);
                 return true;
             }
             catch (Exception e)
             {
+                javaMailSender.send(mailMessage);
                 insert(password.getEmailId(),OTP);
                 return true;
             }
@@ -96,7 +97,11 @@ public class EmailService implements EmailServices
 
         String message = "Please use OTP " + otp + " for your account registration";
 
-        try
+        try {
+
+            jdbcTemplate.queryForObject("select emailId from members where emailId=?", String.class, password.getEmailId());
+            return false;
+        }catch (Exception e)
         {
             SimpleMailMessage mailMessage = new SimpleMailMessage();
 
@@ -104,7 +109,6 @@ public class EmailService implements EmailServices
             mailMessage.setTo(password.getEmailId());
             mailMessage.setSubject(subject);
             mailMessage.setText(message);
-
             String OTP=String.valueOf(otp);
             try
             {
@@ -113,17 +117,16 @@ public class EmailService implements EmailServices
                 javaMailSender.send(mailMessage);
                 return true;
             }
-            catch (Exception e)
+            catch (Exception e1)
             {
+                javaMailSender.send(mailMessage);
                 insert(password.getEmailId(),OTP);
                 return true;
             }
         }
-        catch (Exception e)
-        {
-            return false;
-        }
+
     }
+
 
     public boolean insert(String emailId,String code)
     {
