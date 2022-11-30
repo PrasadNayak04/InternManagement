@@ -106,7 +106,6 @@ public class CandidateService implements CandidateServices
             }
             return false;
         } catch (Exception e) {
-            e.printStackTrace();
             return false;
         }
     }
