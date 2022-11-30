@@ -19,7 +19,7 @@ import java.util.List;
 
 @CrossOrigin
 @RestController
-@RequestMapping(value = "/intern-management/recruiter" , produces = "application/json")
+@RequestMapping(value = "/intern-management/recruiter", produces = "application/json")
 public class RecruiterController
 {
     @Autowired
