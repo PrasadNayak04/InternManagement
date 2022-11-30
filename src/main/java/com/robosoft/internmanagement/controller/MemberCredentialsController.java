@@ -80,6 +80,7 @@ public class MemberCredentialsController {
     public ResponseEntity<?> verify(@RequestBody MemberCredentials memberCredentials)
     {
         String response = emailServices.verification(memberCredentials.getEmailId(), memberCredentials.getOtp());
+        System.out.println(response);
         if (response.equals("VERIFIED"))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(new MemberCredentials(memberCredentials.getName(), memberCredentials.getEmailId()), AppConstants.SUCCESS));
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>(response, AppConstants.TASK_FAILED));
