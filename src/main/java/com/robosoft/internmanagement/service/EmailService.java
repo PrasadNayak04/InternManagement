@@ -142,7 +142,7 @@ public class EmailService implements EmailServices
             String verifyOtp = jdbcTemplate.queryForObject("select otp from forgotpasswords where emailId=?", String.class, password.getEmailId());
 
             if (password.getOtp().equals(verifyOtp) && expireTime < 120) {
-                return "Done";
+                return "Done" + password.getName() + password.getEmailId();
             }
             return "Invalid OTP/Time Expired";
         }catch (Exception e)

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ForgotPassword
 {
+    private String name;
     private String emailId;
     private String otp;
 
