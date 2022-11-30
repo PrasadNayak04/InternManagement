@@ -134,10 +134,8 @@ public class EmailService implements EmailServices
     public String verification(String emailId, String otp)
     {
         try {
-            System.out.println("ss");
             String query = "select now()-forgotpasswords.time from forgotpasswords where emailid=?";
             long expireTime = jdbcTemplate.queryForObject(query, Long.class, emailId);
-            System.out.println(expireTime);
             String verifyOtp = jdbcTemplate.queryForObject("select otp from forgotpasswords where emailId=?", String.class, emailId);
 
             if (otp.equals(verifyOtp) && expireTime < 120) {
@@ -146,7 +144,6 @@ public class EmailService implements EmailServices
             return "INVALID OTP/TIME_EXPIRED";
         }catch (Exception e)
         {
-            e.printStackTrace();
             return "TIME_EXPIRED";
         }
     }

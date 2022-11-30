@@ -55,21 +55,6 @@ public class StorageService implements StorageServices
         return apiUrl + fileName;
     }
 
-    /*public String getContentType(HttpServletRequest request, Resource resource){
-        String contentType = null;
-        try {
-            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-            System.out.println(contentType);
-        } catch (IOException ex) {
-            System.out.println("Could not determine file type.");
-        }
-
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
-        return contentType;
-    }*/
-
     public String getContentType(HttpServletRequest request, Resource resource, String fileName){
         String contentType = null;
         try {
