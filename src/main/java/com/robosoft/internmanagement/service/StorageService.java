@@ -55,7 +55,7 @@ public class StorageService implements StorageServices
         return apiUrl + fileName;
     }
 
-    public String getContentType(HttpServletRequest request, Resource resource){
+    /*public String getContentType(HttpServletRequest request, Resource resource){
         String contentType = null;
         try {
             contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
@@ -65,6 +65,28 @@ public class StorageService implements StorageServices
         }
 
         if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        return contentType;
+    }*/
+
+    public String getContentType(HttpServletRequest request, Resource resource, String fileName){
+        String contentType = null;
+        try {
+            int length = fileName.length();
+            contentType = fileName.substring(length-4,length);
+            if(contentType.equalsIgnoreCase("jfif")) {
+                return "image/jpeg";
+            }
+            contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
+            System.out.println(contentType+" Type ");
+        }
+        catch (IOException ex) {
+            System.out.println("Could not determine file type.");
+        }
+
+        if (contentType == null) {
+            System.out.println("Inside null");
             contentType = "application/octet-stream";
         }
         return contentType;

@@ -11,6 +11,6 @@ public interface StorageServices
 
     String generateDocumentUrl(String fileName);
 
-    String getContentType(HttpServletRequest request, Resource resource);
+    String getContentType(HttpServletRequest request, Resource resource, String fileName);
     
 }
