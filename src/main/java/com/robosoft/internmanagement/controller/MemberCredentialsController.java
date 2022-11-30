@@ -83,7 +83,7 @@ public class MemberCredentialsController {
         System.out.println(response);
         if (response.equals("VERIFIED"))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(new MemberCredentials(memberCredentials.getName(), memberCredentials.getEmailId()), AppConstants.SUCCESS));
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>(response, AppConstants.TASK_FAILED));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(response, AppConstants.TASK_FAILED));
     }
 
     @PatchMapping("/password-update")
