@@ -76,7 +76,7 @@ public class MemberCredentialsController {
         }
     }
 
-    @PutMapping("/otp-verification")
+    @PutMapping(value = "/otp-verification", consumes = "application/json", produces = "application/json")
     public ResponseEntity<?> verify(@RequestBody MemberCredentials memberCredentials)
     {
         String response = emailServices.verification(memberCredentials.getEmailId(), memberCredentials.getOtp());
