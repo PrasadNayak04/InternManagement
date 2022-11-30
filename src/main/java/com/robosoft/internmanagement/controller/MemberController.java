@@ -46,7 +46,7 @@ public class MemberController {
     {
         NotificationDisplay notificationDisplay = memberServices.notification(request);
         if(notificationDisplay == null){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>(notificationDisplay, AppConstants.RECORD_NOT_EXIST));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notificationDisplay, AppConstants.RECORD_NOT_EXIST));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notificationDisplay, AppConstants.SUCCESS));
     }
@@ -54,11 +54,11 @@ public class MemberController {
     @GetMapping("/notifications")
     public ResponseEntity<?> getNotifications(@RequestParam int pageNo, @RequestParam int limit, HttpServletRequest request){
         if(!memberServices.validPageDetails(pageNo, limit)){
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("INVALID PAGE DETAILS", AppConstants.INVALID_INFORMATION));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("INVALID PAGE DETAILS", AppConstants.INVALID_INFORMATION));
         }
         PageData<?> pageData = memberServices.getNotifications(pageNo, limit, request);
         if(pageData == null)
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>(pageData, AppConstants.RECORD_NOT_EXIST));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(pageData, AppConstants.RECORD_NOT_EXIST));
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(pageData, AppConstants.SUCCESS));
 
     }
@@ -66,9 +66,9 @@ public class MemberController {
     @PostMapping("/event-creation")
     public ResponseEntity<?> createEvent(@RequestBody Event event, HttpServletRequest request){
         if(memberServices.createEvent(event, request)){
-            return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseData<>("EVENT CREATION SUCCESSFUL", AppConstants.SUCCESS));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("EVENT CREATION SUCCESSFUL", AppConstants.SUCCESS));
         }
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(new ResponseData<>("EVENT CREATION FAILED", AppConstants.TASK_FAILED));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("EVENT CREATION FAILED", AppConstants.TASK_FAILED));
     }
 
     @PatchMapping("/event-status-update")
@@ -76,7 +76,7 @@ public class MemberController {
         if(memberServices.reactToEventInvite(notificationId, status, request)) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("INVITATION_STATUS UPDATED", AppConstants.SUCCESS));
         }
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("FAILED_TO_UPDATE_EVENT_STATUS", AppConstants.TASK_FAILED));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED_TO_UPDATE_EVENT_STATUS", AppConstants.TASK_FAILED));
     }
 
     @GetMapping("/fetch/{folderName}/{fileName}")

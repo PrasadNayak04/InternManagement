@@ -27,7 +27,7 @@ public class CandidateController {
         if(responseData.getResult().getOpinion().equals("T"))
             return ResponseEntity.status(HttpStatus.OK).body(responseData);
 
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(responseData);
+        return ResponseEntity.status(HttpStatus.OK).body(responseData);
     }
 
 }

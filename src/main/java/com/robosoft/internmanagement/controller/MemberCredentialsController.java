@@ -92,8 +92,8 @@ public class MemberCredentialsController {
         if(updateStatus == 1)
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
         else if (updateStatus == -1)
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("CHOOSE DIFFERENT PASSWORD", AppConstants.TASK_FAILED));
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("TASK FAILED", AppConstants.TASK_FAILED));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("CHOOSE DIFFERENT PASSWORD", AppConstants.TASK_FAILED));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK FAILED", AppConstants.TASK_FAILED));
     }
 
 }

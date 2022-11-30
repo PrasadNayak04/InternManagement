@@ -23,9 +23,9 @@ public class OrganizerController
     {
         ResponseData<?> result = organizerServices.takeInterview(board, request);
         if(result.getResult().getOpinion().equals("F"))
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(result);
+            return ResponseEntity.status(HttpStatus.OK).body(result);
         else
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(result);
+            return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
 }

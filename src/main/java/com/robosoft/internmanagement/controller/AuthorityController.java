@@ -28,9 +28,9 @@ public class AuthorityController {
         ResponseData<?> responseData = authorityServices.addTechnology(technology, request);
 
         if (responseData.getResult().getOpinion().equals("T"))
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseData);
+            return ResponseEntity.status(HttpStatus.OK).body(responseData);
 
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(responseData);
+        return ResponseEntity.status(HttpStatus.OK).body(responseData);
 
     }
 
@@ -52,9 +52,9 @@ public class AuthorityController {
         ResponseData<?> responseData = authorityServices.assignRecruiter(assignBoard, request);
 
         if (responseData.getResult().getOpinion().equals("T"))
-            return ResponseEntity.status(HttpStatus.ACCEPTED).body(responseData);
+            return ResponseEntity.status(HttpStatus.OK).body(responseData);
 
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(responseData);
+        return ResponseEntity.status(HttpStatus.OK).body(responseData);
 
     }
 
