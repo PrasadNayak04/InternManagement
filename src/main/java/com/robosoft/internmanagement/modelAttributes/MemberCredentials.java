@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 
 @Data
@@ -16,6 +17,7 @@ public class MemberCredentials {
     @Pattern(regexp = "[a-zA-Z( )]+")
     private String name;
 
+    @NotBlank
     @Pattern(regexp = "[a-z0-9._%+-]+@[a-z0-9.-]+\\.(com|in|org)")
     private String emailId;
 
