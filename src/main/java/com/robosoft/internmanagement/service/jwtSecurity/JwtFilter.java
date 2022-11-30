@@ -1,6 +1,5 @@
 package com.robosoft.internmanagement.service.jwtSecurity;
 
-import com.robosoft.internmanagement.service.MemberService;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,7 +11,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -24,6 +22,7 @@ public class JwtFilter extends OncePerRequestFilter {
     private JwtUserDetailsService userDetailsService;
     @Autowired
     private TokenManager tokenManager;
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
@@ -40,6 +39,8 @@ public class JwtFilter extends OncePerRequestFilter {
                     System.out.println("Unable to get JWT Token");
                 } catch (ExpiredJwtException e) {
                     System.out.println("JWT Token has expired");
+                } catch (Exception e){
+                    System.out.println("Invalid token");
                 }
             } else {
             System.out.println("Bearer String not found in token");
@@ -60,7 +61,6 @@ public class JwtFilter extends OncePerRequestFilter {
             }
         }
         filterChain.doFilter(request, response);
-
     }
 
 }

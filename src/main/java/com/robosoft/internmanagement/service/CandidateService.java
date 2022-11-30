@@ -1,5 +1,8 @@
 package com.robosoft.internmanagement.service;
 
+import com.robosoft.internmanagement.constants.AppConstants;
+import com.robosoft.internmanagement.exception.FileEmptyException;
+import com.robosoft.internmanagement.exception.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.*;
 import com.robosoft.internmanagement.service.jwtSecurity.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,29 +24,29 @@ public class CandidateService implements CandidateServices
     @Autowired
     private TokenManager tokenManager;
 
-    public String candidateRegister(CandidateProfile candidateProfile, HttpServletRequest request) throws Exception {
+    public ResponseData<?> candidateRegister(CandidateProfile candidateProfile, HttpServletRequest request) throws Exception {
 
-        if(!(isVacantPosition(candidateProfile.getPosition()))){
-            return "Application status is closed.";
+        if(!isVacantPositionLocation(candidateProfile.getPosition(), candidateProfile.getJobLocation())){
+            return new ResponseData<>("FAILED", AppConstants.REQUIREMENTS_FAILED);
         }
 
+        if (alreadyShortlisted(candidateProfile.getEmailId()))
+            return new ResponseData<>("FAILED", AppConstants.RECORD_ALREADY_EXIST);
+
         int candidateId = 0;
+        String photoRes = "", resumeRes = "";
 
         try {
+            photoRes = storageService.singleFileUpload(candidateProfile.getPhoto(), candidateProfile.getEmailId(), request, "CANDIDATE");
+            resumeRes = storageService.singleFileUpload(candidateProfile.getAttachment(), candidateProfile.getEmailId(), request, "CANDIDATE");
+
+            if (photoRes.equals("empty") || resumeRes.equals("empty") || photoRes.equals("") || resumeRes.equals(""))
+                throw new Exception("File not found");
+
             String query1 = "insert into candidatesprofile(name,dob,mobileNumber,emailId,jobLocation,gender,position,expYear,expMonth,candidateType,contactPerson,languagesKnown,softwaresWorked,skills,about,currentCTC,expectedCTC) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             jdbcTemplate.update(query1, candidateProfile.getName(), candidateProfile.getDob(), candidateProfile.getMobileNumber(), candidateProfile.getEmailId(), candidateProfile.getJobLocation(), candidateProfile.getGender(), candidateProfile.getPosition(), candidateProfile.getExpYear(), candidateProfile.getExpMonth(), candidateProfile.getCandidateType(), candidateProfile.getContactPerson(), candidateProfile.getLanguagesKnown(), candidateProfile.getSoftwareWorked(), candidateProfile.getSkills(), candidateProfile.getAbout(), candidateProfile.getCurrentCTC(), candidateProfile.getExpectedCTC());
 
             candidateId = getCandidateId(candidateProfile.getEmailId());
-
-            String photoRes = storageService.singleFileUpload(candidateProfile.getPhoto(), candidateProfile.getEmailId(), request, "CANDIDATE");
-            if (photoRes.equals("empty")) {
-                throw new Exception("File empty");
-            }
-
-            String resumeRes = storageService.singleFileUpload(candidateProfile.getAttachment(), candidateProfile.getEmailId(), request, "CANDIDATE");
-            if (resumeRes.equals("empty")) {
-                throw new Exception("File empty");
-            }
 
             String documentUrlQuery = "insert into documents(candidateId,attachmentUrl,imageUrl) values(?,?,?)";
             jdbcTemplate.update(documentUrlQuery, candidateId, resumeRes, photoRes);
@@ -77,12 +80,15 @@ public class CandidateService implements CandidateServices
             String insertToApplication = "insert into applications(candidateId,designation,location,date) values(?,?,?,?)";
             jdbcTemplate.update(insertToApplication,candidateId,candidateProfile.getPosition(),candidateProfile.getJobLocation(),date);
 
+            return new ResponseData<>("SUCCESS", AppConstants.SUCCESS);
+
         } catch (Exception e) {
             delCandidateQuery(candidateId);
-            return "Save failed";
+            if (photoRes.equals("empty") || resumeRes.equals("empty") || photoRes.equals("") || resumeRes.equals(""))
+                throw new FileEmptyException(AppConstants.REQUIREMENTS_FAILED);
+            else
+                return new ResponseData<>("FAILED", AppConstants.REQUIREMENTS_FAILED);
         }
-
-        return "Candidate saved successfully";
     }
 
     public int getCandidateId(String candidateEmail){
@@ -91,7 +97,6 @@ public class CandidateService implements CandidateServices
     }
 
     public void delCandidateQuery(int candidateId) {
-        System.out.println("deleting " + candidateId);
         String delQuery = "delete from candidatesprofile where candidateId = ?";
         jdbcTemplate.update(delQuery, candidateId);
     }
@@ -100,12 +105,38 @@ public class CandidateService implements CandidateServices
         String query = "select status from technologies where designation = ? and deleted = 0";
         try {
             String status = jdbcTemplate.queryForObject(query, String.class, position);
+
             if(status.equalsIgnoreCase("ACTIVE"))
             {
                 return true;
             }
             return false;
         } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean isVacantPositionLocation(String position, String location){
+        try {
+            String query = "select vacancy from locations where designation = ? and location =  ? and deleted = 0";
+            int vacancy = jdbcTemplate.queryForObject(query, Integer.class, position, location);
+
+            if(isVacantPosition(position) && vacancy > 0)
+            {
+                return true;
+            }
+            return false;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean alreadyShortlisted(String emailId){
+        String query ="select count(candidateId) from assignboard inner join candidatesprofile using(candidateId) where emailId = ? and status = 'SHORTLISTED' and assignboard.deleted = 0 and candidatesprofile.deleted = 0";
+        try{
+            int status =  jdbcTemplate.queryForObject(query, Integer.class, emailId);
+            return status > 0;
+        }catch (Exception e){
             return false;
         }
     }

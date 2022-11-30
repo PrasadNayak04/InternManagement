@@ -1,6 +1,8 @@
 package com.robosoft.internmanagement.service;
 
+import com.robosoft.internmanagement.exception.ResponseData;
 import com.robosoft.internmanagement.model.Application;
+import com.robosoft.internmanagement.model.MemberModel;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Technology;
 
@@ -9,10 +11,10 @@ import java.util.List;
 
 public interface AuthorityServices
 {
-    boolean addTechnology(Technology technology, HttpServletRequest request);
-    List<?> getAllRecruiters();
+    ResponseData<?> addTechnology(Technology technology, HttpServletRequest request);
+    List<MemberModel> getAllRecruiters();
 
     List<Application> getApplicants();
 
-    String assignRecruiter(AssignBoard assignBoard);
+    ResponseData<String> assignRecruiter(AssignBoard assignBoard, HttpServletRequest request);
 }

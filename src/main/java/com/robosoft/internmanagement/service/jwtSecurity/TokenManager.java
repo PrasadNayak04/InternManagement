@@ -18,6 +18,7 @@ public class TokenManager implements Serializable {
 
     @Value("${secret}")
     private String jwtSecret;
+
     public String generateJwtToken(UserDetails userDetails) {
         try {
             Map<String, Object> claims = new HashMap<>();
@@ -26,7 +27,6 @@ public class TokenManager implements Serializable {
                     .setExpiration(new Date(System.currentTimeMillis() + TOKEN_VALIDITY * 1000))
                     .signWith(SignatureAlgorithm.HS512, jwtSecret).compact();
         } catch(NullPointerException e){
-            System.out.println("User not found...");
             return null;
         }
     }

@@ -16,6 +16,7 @@ public class AssignBoard
     private String recruiterEmail;
     private String organizerEmail;
     private Date assignDate;
+    private Date interviewDate;
     private String status;
     private boolean okWithOtherLocations;
 

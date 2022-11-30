@@ -1,7 +1,9 @@
 package com.robosoft.internmanagement.controller;
 
-import com.robosoft.internmanagement.modelAttributes.ForgotPassword;
+import com.robosoft.internmanagement.constants.AppConstants;
+import com.robosoft.internmanagement.exception.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.Member;
+import com.robosoft.internmanagement.modelAttributes.MemberCredentials;
 import com.robosoft.internmanagement.modelAttributes.MemberProfile;
 import com.robosoft.internmanagement.service.EmailServices;
 import com.robosoft.internmanagement.service.MemberServices;
@@ -16,10 +18,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
 
 @RestController
 @CrossOrigin
-@RequestMapping(value = "/member-credentials")
+@RequestMapping(value = "/intern-management/member-credentials")
 public class MemberCredentialsController {
 
     @Autowired
@@ -35,9 +38,18 @@ public class MemberCredentialsController {
     @Autowired
     private EmailServices emailServices;
 
+    @PostMapping(value = "/email-verification")
+    public ResponseEntity<?> verifyMail(@RequestBody MemberCredentials memberCredentials){
+        boolean mailSent = emailServices.sendRegistrationOtp(memberCredentials.getEmailId());
+        if(mailSent){
+            return ResponseEntity.ok(memberCredentials.getEmailId());
+        }else{
+            return ResponseEntity.ok("false");
+        }
+    }
 
     @PostMapping(value = "/register")
-    public String registerMember(@RequestBody MemberProfile memberProfile, HttpServletRequest request){
+    public String registerMember(@Valid @RequestBody MemberProfile memberProfile, HttpServletRequest request){
         return memberServices.registerMember(memberProfile, request);
     }
 
@@ -54,8 +66,8 @@ public class MemberCredentialsController {
     }
 
     @PostMapping("/otp")
-    public ResponseEntity<?> sendMail(@RequestBody ForgotPassword password){
-        boolean mailSent = emailServices.sendEmail(password);
+    public ResponseEntity<?> sendMail(@RequestBody MemberCredentials memberCredentials){
+        boolean mailSent = emailServices.sendEmail(memberCredentials.getEmailId());
 
         if(mailSent){
             return ResponseEntity.ok("true");
@@ -64,30 +76,23 @@ public class MemberCredentialsController {
         }
     }
 
-    @PostMapping(value = "/email-verification")
-    public ResponseEntity<?> verifyMail(@RequestBody ForgotPassword password){
-        boolean mailSent = emailServices.sendRegistrationOtp(password);
-        if(mailSent){
-            return ResponseEntity.ok(password.getEmailId());
-        }else{
-            return ResponseEntity.ok("false");
-        }
-    }
-
-    @PutMapping(value = "/otp-verification")
-    public ResponseEntity<?> verify(@RequestBody ForgotPassword password)
+    @PutMapping("/otp-verification")
+    public ResponseEntity<?> verify(@RequestBody MemberCredentials memberCredentials)
     {
-        return ResponseEntity.ok(emailServices.verification(password));
+        String response = emailServices.verification(memberCredentials.getEmailId(), memberCredentials.getOtp());
+        if (response.equals("VERIFIED"))
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(new MemberCredentials(memberCredentials.getName(), memberCredentials.getEmailId()), AppConstants.SUCCESS));
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>(response, AppConstants.TASK_FAILED));
     }
 
     @PatchMapping("/password-update")
     public ResponseEntity<?> updatePassword(@RequestBody Member member){
         int updateStatus = memberServices.updatePassword(member);
         if(updateStatus == 1)
-            return ResponseEntity.ok("true");
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
         else if (updateStatus == -1)
-            return ResponseEntity.ok("same");
-        return ResponseEntity.ok("false");
+            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("CHOOSE DIFFERENT PASSWORD", AppConstants.TASK_FAILED));
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("TASK FAILED", AppConstants.TASK_FAILED));
     }
 
 }

@@ -1,7 +1,6 @@
 package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.modelAttributes.CandidateInvite;
-import com.robosoft.internmanagement.modelAttributes.ForgotPassword;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
@@ -30,7 +29,7 @@ public class EmailService implements EmailServices
     @Value("${spring.mail.username}")
     private String sender;
 
-    public boolean sendEmail(ForgotPassword password)
+    public boolean sendEmail(String toEmail)
     {
 
         boolean flag = false;
@@ -43,27 +42,26 @@ public class EmailService implements EmailServices
 
         try
         {
-            jdbcTemplate.queryForObject("select emailId from members where emailId=?", String.class,password.getEmailId());
+            jdbcTemplate.queryForObject("select emailId from members where emailId=?", String.class,toEmail);
 
             SimpleMailMessage mailMessage = new SimpleMailMessage();
 
             mailMessage.setFrom(sender);
-            mailMessage.setTo(password.getEmailId());
+            mailMessage.setTo(toEmail);
             mailMessage.setSubject(subject);
             mailMessage.setText(message);
 
+            javaMailSender.send(mailMessage);
             String OTP=String.valueOf(otp);
             try
             {
-                jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,password.getEmailId());
-                jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,password.getEmailId());
-                javaMailSender.send(mailMessage);
+                jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,toEmail);
+                jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,toEmail);
                 return true;
             }
             catch (Exception e)
             {
-                javaMailSender.send(mailMessage);
-                insert(password.getEmailId(),OTP);
+                insert(toEmail,OTP);
                 return true;
             }
 
@@ -71,6 +69,43 @@ public class EmailService implements EmailServices
         catch (Exception e)
         {
             return false;
+        }
+
+    }
+
+    public boolean sendRegistrationOtp(String toEmail)
+    {
+        String subject = "OTP from Intern Management";
+
+        int otp = generateOTP();
+
+        String message = "Please use OTP " + otp + " for your account registration";
+
+        try {
+            jdbcTemplate.queryForObject("select emailId from members where emailId=?", String.class, toEmail);
+            return false;
+        }catch (Exception e)
+        {
+            SimpleMailMessage mailMessage = new SimpleMailMessage();
+
+            mailMessage.setFrom(sender);
+            mailMessage.setTo(toEmail);
+            mailMessage.setSubject(subject);
+            mailMessage.setText(message);
+            String OTP=String.valueOf(otp);
+            try
+            {
+                jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,toEmail);
+                jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,toEmail);
+                javaMailSender.send(mailMessage);
+                return true;
+            }
+            catch (Exception e1)
+            {
+                javaMailSender.send(mailMessage);
+                insert(toEmail,OTP);
+                return true;
+            }
         }
 
     }
@@ -86,44 +121,6 @@ public class EmailService implements EmailServices
         return otp;
     }
 
-    public boolean sendRegistrationOtp(ForgotPassword password)
-    {
-        String subject = "OTP from Intern Management";
-
-        int otp = generateOTP();
-
-        String message = "Please use OTP " + otp + " for your account registration";
-
-        try {
-            jdbcTemplate.queryForObject("select emailId from members where emailId=?", String.class, password.getEmailId());
-            return false;
-        }catch (Exception e)
-        {
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-
-            mailMessage.setFrom(sender);
-            mailMessage.setTo(password.getEmailId());
-            mailMessage.setSubject(subject);
-            mailMessage.setText(message);
-            String OTP=String.valueOf(otp);
-            try
-            {
-                jdbcTemplate.queryForObject("select emailId from forgotpasswords where emailId=?", String.class,password.getEmailId());
-                jdbcTemplate.update("update forgotpasswords set otp=?,time=current_timestamp where emailId=?",OTP,password.getEmailId());
-                javaMailSender.send(mailMessage);
-                return true;
-            }
-            catch (Exception e1)
-            {
-                javaMailSender.send(mailMessage);
-                insert(password.getEmailId(),OTP);
-                return true;
-            }
-        }
-
-    }
-
-
     public boolean insert(String emailId,String code)
     {
         try{
@@ -134,20 +131,20 @@ public class EmailService implements EmailServices
         }
     }
 
-    public String verification(ForgotPassword password)
+    public String verification(String emailId, String otp)
     {
         try {
             String query = "select now()-forgotpasswords.time from forgotpasswords where emailid=?";
-            long expireTime = jdbcTemplate.queryForObject(query, Long.class, password.getEmailId());
-            String verifyOtp = jdbcTemplate.queryForObject("select otp from forgotpasswords where emailId=?", String.class, password.getEmailId());
+            long expireTime = jdbcTemplate.queryForObject(query, Long.class, emailId);
+            String verifyOtp = jdbcTemplate.queryForObject("select otp from forgotpasswords where emailId=?", String.class, emailId);
 
-            if (password.getOtp().equals(verifyOtp) && expireTime < 120) {
-                return "Done";
+            if (otp.equals(verifyOtp) && expireTime < 120) {
+                return "VERIFIED";
             }
-            return "Invalid OTP/Time Expired";
+            return "INVALID OTP/TIME_EXPIRED";
         }catch (Exception e)
         {
-            return "Time Expired";
+            return "TIME_EXPIRED";
         }
     }
 
@@ -174,9 +171,9 @@ public class EmailService implements EmailServices
         }
         catch (Exception e)
         {
-            e.printStackTrace();
             return false;
         }
+
     }
 
     public boolean resendInvite(int inviteId, HttpServletRequest request)
@@ -185,10 +182,11 @@ public class EmailService implements EmailServices
         String subject = "Invite from Robosoft Technologies";
         String message = "Inviting to join us as a intern.";
 
-        String query = "select * from candidatesinvites where candidateInviteId=?";
-        CandidateInvite invites = jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(CandidateInvite.class), inviteId);
         try
         {
+            String query = "select * from candidatesinvites where candidateInviteId=?";
+            CandidateInvite invites = jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(CandidateInvite.class), inviteId);
+
             String check = "select designation from candidatesinvites where candidateInviteId=? and fromEmail=?";
             jdbcTemplate.queryForObject(check, String.class,inviteId, currentUser);
 

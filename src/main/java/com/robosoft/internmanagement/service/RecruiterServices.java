@@ -1,5 +1,6 @@
 package com.robosoft.internmanagement.service;
 
+import com.robosoft.internmanagement.exception.ResponseData;
 import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Education;
@@ -18,9 +19,10 @@ public interface RecruiterServices
     boolean reRecruitCandidate(int candidateId, HttpServletRequest request);
 
     boolean deleteCandidate(int candidateId, HttpServletRequest request);
+
     List<?> getAllOrganizers();
 
-    List<?> getOrganizer(Integer limit, HttpServletRequest request);
+    List<?> getOrganizers(Integer limit, HttpServletRequest request);
 
     int getInterviewsCount(String organizerEmail, String recruiterEmail);
 
@@ -28,7 +30,7 @@ public interface RecruiterServices
 
     int cvCount(HttpServletRequest request);
 
-    List<?> cvAnalysisPage(Date date, int pageNo, int limit);
+    PageData<?> cvAnalysisPage(Date date, int pageNo, int limit);
 
     CvAnalysis searchDesignation(String designation);
 
@@ -50,22 +52,23 @@ public interface RecruiterServices
 
     String getLastJobPosition(int candidateId);
 
-    List<?> getProfileBasedOnStatus(String designation, String status, int pageNo, int limit, HttpServletRequest request);
+    PageData<?> getProfileBasedOnStatus(String designation, String status, int pageNo, int limit, HttpServletRequest request);
 
     List<Application> getNotAssignedApplicants(HttpServletRequest request);
 
-    String assignOrganizer(AssignBoard assignBoard, HttpServletRequest request);
+    ResponseData<?> assignOrganizer(AssignBoard assignBoard, HttpServletRequest request);
 
-    List<?> getAssignBoardPage(int pageNo, int limit, HttpServletRequest request);
+    PageData<?> getAssignBoardPage(int pageNo, int limit, HttpServletRequest request);
 
-    List<?> getRejectedCvPage(int pageNo, int limit, HttpServletRequest request);
+    PageData<?> getRejectedCvPage(int pageNo, int limit, HttpServletRequest request);
 
     Invite getInviteInfo(HttpServletRequest request);
 
-    List<?> getByDay(Date date, int pageNo, int limit, HttpServletRequest request);
+    PageData<?> getByDay(Date date, int pageNo, int limit, HttpServletRequest request);
 
-    List<?> getByMonth(Date date, int pageNo, int limit, HttpServletRequest request);
+    PageData<?> getByMonth(Date date, int pageNo, int limit, HttpServletRequest request);
 
-    List<?> getByYear(Date date, int pageNo, int limit, HttpServletRequest request);
+    PageData<?> getByYear(Date date, int pageNo, int limit, HttpServletRequest request);
 
+    List<SentInvite> searchInvites(int value, Date date, String name, HttpServletRequest request);
 }

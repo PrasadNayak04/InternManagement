@@ -1,7 +1,9 @@
 package com.robosoft.internmanagement.service;
 
+import com.robosoft.internmanagement.exception.ResponseData;
 import com.robosoft.internmanagement.model.LoggedProfile;
 import com.robosoft.internmanagement.model.NotificationDisplay;
+import com.robosoft.internmanagement.model.PageData;
 import com.robosoft.internmanagement.modelAttributes.Event;
 import com.robosoft.internmanagement.modelAttributes.Member;
 import com.robosoft.internmanagement.modelAttributes.MemberProfile;
@@ -25,9 +27,11 @@ public interface MemberServices
 
     void rollbackEvent(int eventId);
 
+    boolean deleteExistingCandidate(int candidateId);
+
     boolean reactToEventInvite(int notificationId, String status, HttpServletRequest request);
 
-    List<?> getNotifications(int pageNo, int limit, HttpServletRequest request);
+    PageData<?> getNotifications(int pageNo, int limit, HttpServletRequest request);
 
     String encodePassword(String password);
 
