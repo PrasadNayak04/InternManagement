@@ -115,7 +115,7 @@ public class RecruiterService implements RecruiterServices {
         int totalCount = 0;
         try {
             if (pageNo == 1) {
-                query = "select count(distinct applications.designation) from applications,technologies where applications.designation = technologies.designation and date=? and applications.deleted = 0 and technologies.deleted = 0 group by applications.designation";
+                query = "select count(distinct applications.designation) from applications,technologies where applications.designation = technologies.designation and date=? and applications.deleted = 0 and technologies.deleted = 0";
                 totalCount = jdbcTemplate.queryForObject(query, Integer.class, date);
             }
 

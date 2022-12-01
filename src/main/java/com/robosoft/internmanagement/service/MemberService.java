@@ -49,13 +49,14 @@ public class MemberService implements MemberServices
         }
     }
 
-    public String registerMember(MemberProfile memberProfile, HttpServletRequest request){
+    public ResponseData registerMember(MemberProfile memberProfile, HttpServletRequest request){
+
 
         query = "select count(emailId) from membersprofile where emailId = ? and deleted = 0";
         int count = jdbcTemplate.queryForObject(query, Integer.class, memberProfile.getEmailId());
 
         if(count > 0){
-            return "Already registered";
+            return new ResponseData("FAILED", AppConstants.RECORD_ALREADY_EXIST);
         }
 
         memberProfile.setPassword(encodePassword(memberProfile.getPassword()));
@@ -72,14 +73,28 @@ public class MemberService implements MemberServices
             query = "insert into membersprofile(name, emailId, photoUrl, mobileNumber, designation, position) values (?,?,?,?,?,?)";
             jdbcTemplate.update(query, memberProfile.getName(), memberProfile.getEmailId(), photoDownloadUrl, memberProfile.getMobileNumber(), memberProfile.getDesignation(), memberProfile.getPosition());
 
-            return "User credentials saved";
+            MemberModel memberModel = createMemberModel(memberProfile, photoDownloadUrl);
+            return new ResponseData<>(memberModel, AppConstants.SUCCESS);
 
         } catch(Exception e){
             query = "delete from members where emailId = ? and deleted = 0";
             jdbcTemplate.update(query, memberProfile.getEmailId());
-            return "Unable to save user credentials";
+            throw new DatabaseException(AppConstants.REQUIREMENTS_FAILED);
         }
 
+    }
+
+    public  MemberModel createMemberModel(MemberProfile memberProfile, String photoDownloadUrl){
+        return new MemberModel(memberProfile.getEmailId(), memberProfile.getName(), photoDownloadUrl, memberProfile.getMobileNumber(), memberProfile.getDesignation(), memberProfile.getPosition());
+    }
+
+    public MemberModel createLoggedInMemberModel(String emailId){
+        try{
+            String query = "select emailId, name, photoUrl, mobileNumber, designation, position from membersprofile where emailId = ? and deleted = 0";
+            return jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(MemberModel.class), emailId);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     public int updatePassword(Member member){

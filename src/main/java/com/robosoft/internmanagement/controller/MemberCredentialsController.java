@@ -1,7 +1,9 @@
 package com.robosoft.internmanagement.controller;
 
 import com.robosoft.internmanagement.constants.AppConstants;
+import com.robosoft.internmanagement.exception.JwtTokenException;
 import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.MemberModel;
 import com.robosoft.internmanagement.modelAttributes.Member;
 import com.robosoft.internmanagement.modelAttributes.MemberCredentials;
 import com.robosoft.internmanagement.modelAttributes.MemberProfile;
@@ -13,6 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -49,8 +53,12 @@ public class MemberCredentialsController {
     }
 
     @PostMapping(value = "/register")
-    public String registerMember(@Valid @RequestBody MemberProfile memberProfile, HttpServletRequest request){
-        return memberServices.registerMember(memberProfile, request);
+    public ResponseEntity<?> registerMember(@Valid @RequestBody MemberProfile memberProfile, HttpServletRequest request){
+        ResponseData<?> responseData = memberServices.registerMember(memberProfile, request);
+        if(responseData.getResult().getOpinion().equals("T"))
+            return ResponseEntity.status(HttpStatus.OK).body(responseData);
+
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(responseData);
     }
 
     @PostMapping(value = "/login")
@@ -59,9 +67,21 @@ public class MemberCredentialsController {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(member.getEmailId(), member.getPassword()));
             final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmailId());
             final String jwtToken = tokenManager.generateJwtToken(userDetails);
-            return ResponseEntity.ok(jwtToken);
-        } catch (Exception e) {
-            return ResponseEntity.ok("false");
+            MemberModel memberModel = memberServices.createLoggedInMemberModel(member.getEmailId());
+            memberModel.setToken(jwtToken);
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(memberModel, AppConstants.SUCCESS));
+        } catch (DisabledException e) {
+            e.printStackTrace();
+            throw new Exception("USER_DISABLED", e);
+        }
+        catch (BadCredentialsException e) {
+            return ResponseEntity.badRequest().body(new ResponseData<>("LOGIN_FAILED", AppConstants.INVALID_INFORMATION));
+        }
+        catch (JwtTokenException jwtTokenException){
+            return ResponseEntity.badRequest().body(new ResponseData<>(jwtTokenException.getMessage(), AppConstants.INVALID_INFORMATION));
+        }
+        catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("LOGIN FAILED", AppConstants.TASK_FAILED));
         }
     }
 
