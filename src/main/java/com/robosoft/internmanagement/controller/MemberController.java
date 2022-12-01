@@ -98,7 +98,12 @@ public class MemberController {
                 .body(resource);
     }
 
+    @PatchMapping("/notification-removal/{notificationId}")
+    public ResponseEntity<?> removeNotification(@PathVariable int notificationId, HttpServletRequest request){
+        if(memberServices.removeNotification(notificationId, request))
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
 
-
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
+    }
 
 }

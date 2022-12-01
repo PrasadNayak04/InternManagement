@@ -331,4 +331,10 @@ public class MemberService implements MemberServices
         return status >= 1;
     }
 
+    public boolean removeNotification(int notificationId, HttpServletRequest request){
+        String query = "update notifications set deleted = 1 where notificationId = ? and emailId = ? and deleted = 0";
+        int count = jdbcTemplate.update(query, notificationId, getUserNameFromRequest(request));
+        return count > 0;
+    }
+
 }

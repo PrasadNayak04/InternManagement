@@ -41,4 +41,6 @@ public interface MemberServices
     String getMemberNameByEmail(String email);
 
     boolean validPageDetails(int pageNo, Integer limit);
+
+    boolean removeNotification(int notificationId, HttpServletRequest request);
 }
