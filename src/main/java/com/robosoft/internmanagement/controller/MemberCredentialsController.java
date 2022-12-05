@@ -61,7 +61,7 @@ public class MemberCredentialsController {
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(responseData);
     }
 
-    @PostMapping(value = "/login")
+    @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> createToken(@RequestBody Member member, HttpServletRequest request) throws Exception {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(member.getEmailId(), member.getPassword()));

@@ -230,6 +230,19 @@ public class MemberService implements MemberServices
             query = "insert into notifications(emailId, message, type) values (?,?,?)";
             jdbcTemplate.update(query, eventCreator, message, "OTHERS");
 
+            query = "update notifications set deleted = 1 where notificationId = ? and emailId = ? and deleted = 0";
+            jdbcTemplate.update(query, notificationId, getUserNameFromRequest(request));
+
+            query = "insert into notifications(emailId, message, type) values(?,?,?)";
+            String reaction;
+            if(status.equalsIgnoreCase("JOIN"))
+                reaction = "accepted";
+            else
+                reaction = "declined";
+
+            message = "You " + reaction + " the event invite '" + eventTitle + "' by " + eventCreator;
+            jdbcTemplate.update(query, getUserNameFromRequest(request), message, "OTHERS");
+
             return true;
 
         } catch (Exception e) {
