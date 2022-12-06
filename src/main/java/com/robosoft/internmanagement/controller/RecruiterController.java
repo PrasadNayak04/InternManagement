@@ -81,14 +81,14 @@ public class RecruiterController
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(organizers, AppConstants.SUCCESS));
     }
 
-    @GetMapping("/summary")
+    @GetMapping(value = "/summary", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> getSummary(@RequestParam(required = false) Date date, HttpServletRequest request)
     {
         Summary summary = recruiterServices.getSummary(date, request);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(summary, AppConstants.SUCCESS));
     }
 
-    @GetMapping("/cv-count")
+    @GetMapping(value = "/cv-count", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> getCVCount(HttpServletRequest request)
     {
         int count = recruiterServices.cvCount(request);
