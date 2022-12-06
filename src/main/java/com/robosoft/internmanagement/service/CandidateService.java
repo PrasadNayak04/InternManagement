@@ -1,5 +1,6 @@
 package com.robosoft.internmanagement.service;
 
+import com.cloudinary.utils.ObjectUtils;
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.FileEmptyException;
 import com.robosoft.internmanagement.exception.ResponseData;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CandidateService implements CandidateServices
@@ -26,6 +28,7 @@ public class CandidateService implements CandidateServices
 
     public ResponseData<?> candidateRegister(CandidateProfile candidateProfile, HttpServletRequest request) throws Exception {
 
+        System.out.println("hi1");
         if(!isVacantPositionLocation(candidateProfile.getPosition(), candidateProfile.getJobLocation())){
             return new ResponseData<>("FAILED", AppConstants.REQUIREMENTS_FAILED);
         }
@@ -37,16 +40,33 @@ public class CandidateService implements CandidateServices
         String photoRes = "", resumeRes = "";
 
         try {
-            photoRes = storageService.singleFileUpload(candidateProfile.getPhoto(), candidateProfile.getEmailId(), request, "CANDIDATE");
-            resumeRes = storageService.singleFileUpload(candidateProfile.getAttachment(), candidateProfile.getEmailId(), request, "CANDIDATE");
+            System.out.println("hi2");
+            /*photoRes = storageService.singleFileUpload(candidateProfile.getPhoto(), candidateProfile.getEmailId(), request, "CANDIDATE");
+            resumeRes = storageService.singleFileUpload(candidateProfile.getAttachment(), candidateProfile.getEmailId(), request, "CANDIDATE");*/
 
-            if (photoRes.equals("empty") || resumeRes.equals("empty") || photoRes.equals("") || resumeRes.equals(""))
-                throw new Exception("File not found");
+            Map uploadResult1 = storageService.upload(candidateProfile.getPhoto().getBytes(), ObjectUtils.asMap("resourcetype", "auto"));
+            photoRes = uploadResult1.get("url").toString();
+
+            Map uploadResult2 = storageService.upload(candidateProfile.getAttachment().getBytes(), ObjectUtils.asMap("resourcetype", "auto"));
+            resumeRes = uploadResult2.get("url").toString();
+
+            if (photoRes.equals("empty") || resumeRes.equals("empty") || photoRes.equals("") || resumeRes.equals("")){
+                System.out.println("iam inside");
+                throw new Exception("File not found");}
+
+            System.out.println("hi3");
 
             String query1 = "insert into candidatesprofile(name,dob,mobileNumber,emailId,jobLocation,gender,position,expYear,expMonth,candidateType,contactPerson,languagesKnown,softwaresWorked,skills,about,currentCTC,expectedCTC) values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
             jdbcTemplate.update(query1, candidateProfile.getName(), candidateProfile.getDob(), candidateProfile.getMobileNumber(), candidateProfile.getEmailId(), candidateProfile.getJobLocation(), candidateProfile.getGender(), candidateProfile.getPosition(), candidateProfile.getExpYear(), candidateProfile.getExpMonth(), candidateProfile.getCandidateType(), candidateProfile.getContactPerson(), candidateProfile.getLanguagesKnown(), candidateProfile.getSoftwareWorked(), candidateProfile.getSkills(), candidateProfile.getAbout(), candidateProfile.getCurrentCTC(), candidateProfile.getExpectedCTC());
 
             candidateId = getCandidateId(candidateProfile.getEmailId());
+
+            /*photoRes = storageService.uploadToAzure(candidateProfile.getPhoto(), candidateId, request, "CANDIDATE");
+            resumeRes = storageService.uploadToAzure(candidateProfile.getAttachment(), candidateId, request, "CANDIDATE");*/
+
+            if (photoRes.equals("empty") || resumeRes.equals("empty") || photoRes.equals("") || resumeRes.equals("")){
+                System.out.println("iam inside");
+                throw new Exception("File not found");}
 
             String documentUrlQuery = "insert into documents(candidateId,attachmentUrl,imageUrl) values(?,?,?)";
             jdbcTemplate.update(documentUrlQuery, candidateId, resumeRes, photoRes);
@@ -84,6 +104,7 @@ public class CandidateService implements CandidateServices
 
         } catch (Exception e) {
             delCandidateQuery(candidateId);
+            e.printStackTrace();
             if (photoRes.equals("empty") || resumeRes.equals("empty") || photoRes.equals("") || resumeRes.equals(""))
                 throw new FileEmptyException(AppConstants.REQUIREMENTS_FAILED);
             else
