@@ -395,12 +395,13 @@ public class RecruiterService implements RecruiterServices {
     public List<?>  getAssignBoardPage(HttpServletRequest request) {
         String currentUser = memberService.getUserNameFromRequest(request);
         try {
-            query = "select candidatesprofile.candidateId,candidatesprofile.name,applications.designation,applications.location,AssignBoard.assignDate,membersprofile.name as organizer  from membersprofile inner join Assignboard on membersprofile.emailId=organizerEmail inner join applications on AssignBoard.candidateId=applications.candidateId inner join candidatesprofile on candidatesprofile.candidateId=applications.candidateId where recruiterEmail=? and status = 'NEW' and membersprofile.deleted = 0 and candidatesprofile.deleted = 0 and Assignboard.deleted = 0 and applications.deleted = 0 group by applications.candidateId";
+            query = "select candidatesprofile.candidateId,candidatesprofile.name,applications.designation,applications.location,assignboard.assignDate,membersprofile.name as organizer  from membersprofile inner join assignboard on membersprofile.emailId=organizerEmail inner join applications on assignboard.candidateId=applications.candidateId inner join candidatesprofile on candidatesprofile.candidateId=applications.candidateId where recruiterEmail=? and status = 'NEW' and membersprofile.deleted = 0 and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and applications.deleted = 0 group by applications.candidateId";
             List<AssignBoardPage> assignBoardPages = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(AssignBoardPage.class), currentUser);
 
             return assignBoardPages;
 
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
