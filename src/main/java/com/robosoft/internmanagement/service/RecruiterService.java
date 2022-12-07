@@ -2,9 +2,11 @@ package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.DatabaseException;
-import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.*;
-import com.robosoft.internmanagement.modelAttributes.*;
+import com.robosoft.internmanagement.modelAttributes.AssignBoard;
+import com.robosoft.internmanagement.modelAttributes.Education;
+import com.robosoft.internmanagement.modelAttributes.Link;
+import com.robosoft.internmanagement.modelAttributes.WorkHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -166,7 +168,7 @@ public class RecruiterService implements RecruiterServices {
     }
 
     public List<String> getLocationsByDesignation(String designation) {
-        query = "select location from locations where designation = ? and deleted = 0";
+        query = "select location from locations where designation = ? and location != 'ANY' and deleted = 0";
         return jdbcTemplate.queryForList(query, String.class, designation);
     }
 

@@ -31,7 +31,7 @@ public class RecruiterController
     @Autowired
     private MemberServices memberServices;
 
-    @PatchMapping("/candidate-rejection/{candidateId}")
+    @PutMapping("/candidate-rejection/{candidateId}")
     public ResponseEntity<?> rejectCandidate(@PathVariable int candidateId, HttpServletRequest request){
         if(recruiterServices.rejectAssignedCandidate(candidateId,request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
@@ -39,7 +39,7 @@ public class RecruiterController
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK FAILED", AppConstants.TASK_FAILED));
     }
 
-    @PatchMapping("/candidate-recruitment/{candidateId}")
+    @PutMapping("/candidate-recruitment/{candidateId}")
     public ResponseEntity<?> reRecruitCandidate(@PathVariable int candidateId, HttpServletRequest request){
         if(recruiterServices.reRecruitCandidate(candidateId,request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
@@ -47,7 +47,7 @@ public class RecruiterController
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK FAILED", AppConstants.TASK_FAILED));
     }
 
-    @PatchMapping("/candidate-deletion/{candidateId}")
+    @PutMapping("/candidate-deletion/{candidateId}")
     public ResponseEntity<?> deleteCandidate(@PathVariable int candidateId, HttpServletRequest request){
         if(recruiterServices.deleteCandidate(candidateId,request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
@@ -119,7 +119,7 @@ public class RecruiterController
 
     }
 
-    @PatchMapping("/update-position-status")
+    @PutMapping("/update-position-status")
     public ResponseEntity<?> updatePositionStatus(@RequestParam String designation, @RequestParam String newStatus) {
         int rowsUpdated = recruiterServices.updateStatus(designation, newStatus);
         if (rowsUpdated > 0)

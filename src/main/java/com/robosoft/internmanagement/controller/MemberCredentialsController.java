@@ -64,12 +64,14 @@ public class MemberCredentialsController {
     @PostMapping(value = "/login", produces = "application/json", consumes = "application/json")
     public ResponseEntity<?> createToken(@RequestBody Member member, HttpServletRequest request) throws Exception {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(member.getEmailId(), member.getPassword()));
-            final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmailId());
-            final String jwtToken = tokenManager.generateJwtToken(userDetails);
             MemberModel memberModel = memberServices.createLoggedInMemberModel(member.getEmailId());
-            memberModel.setToken(jwtToken);
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(memberModel, AppConstants.SUCCESS));
+            if(memberModel.getPosition().equalsIgnoreCase(member.getRole())) {
+                authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(member.getEmailId(), member.getPassword()));
+                final UserDetails userDetails = userDetailsService.loadUserByUsername(member.getEmailId());
+                final String jwtToken = tokenManager.generateJwtToken(userDetails);
+                memberModel.setToken(jwtToken);
+                return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(memberModel, AppConstants.SUCCESS));
+            }
         } catch (DisabledException e) {
             e.printStackTrace();
             throw new Exception("USER_DISABLED", e);
@@ -83,6 +85,7 @@ public class MemberCredentialsController {
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("LOGIN FAILED", AppConstants.TASK_FAILED));
         }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("LOGIN FAILED", AppConstants.TASK_FAILED));
     }
 
     @PostMapping("/otp")
@@ -106,7 +109,7 @@ public class MemberCredentialsController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(response, AppConstants.TASK_FAILED));
     }
 
-    @PatchMapping("/password-update")
+    @PutMapping("/password-update")
     public ResponseEntity<?> updatePassword(@RequestBody Member member){
         int updateStatus = memberServices.updatePassword(member);
         if(updateStatus == 1)

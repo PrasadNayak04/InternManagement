@@ -65,10 +65,7 @@ public class MemberService implements MemberServices
             query = "insert into members(emailId, password, role) values(?,?,?)";
             jdbcTemplate.update(query, memberProfile.getEmailId(), memberProfile.getPassword(), "ROLE_" + memberProfile.getPosition().toUpperCase());
 
-            String photoDownloadUrl = storageService.singleFileUpload(memberProfile.getPhoto(), memberProfile.getEmailId(), request, "MEMBER");
-
-            if (photoDownloadUrl.equals("empty"))
-                photoDownloadUrl = "http://localhost:8080/intern-management/member/fetch/default@gmail.com/default.png";
+            String photoDownloadUrl = "https://res.cloudinary.com/de3kkygvy/image/upload/v1670404248/default_eimkt0.png";
 
             query = "insert into membersprofile(name, emailId, photoUrl, mobileNumber, designation, position) values (?,?,?,?,?,?)";
             jdbcTemplate.update(query, memberProfile.getName(), memberProfile.getEmailId(), photoDownloadUrl, memberProfile.getMobileNumber(), memberProfile.getDesignation(), memberProfile.getPosition());

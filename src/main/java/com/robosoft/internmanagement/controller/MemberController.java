@@ -1,26 +1,18 @@
 package com.robosoft.internmanagement.controller;
 
 import com.robosoft.internmanagement.constants.AppConstants;
-import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.LoggedProfile;
 import com.robosoft.internmanagement.model.NotificationDisplay;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.Event;
 import com.robosoft.internmanagement.service.MemberServices;
 import com.robosoft.internmanagement.service.StorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 @RestController
@@ -69,7 +61,7 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("EVENT CREATION FAILED", AppConstants.TASK_FAILED));
     }
 
-    @PatchMapping("/event-status-update")
+    @PutMapping("/event-status-update")
     public ResponseEntity<?> reactEventInvite(@RequestParam int notificationId, @RequestParam String status, HttpServletRequest request){
         if(memberServices.reactToEventInvite(notificationId, status, request)) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("INVITATION_STATUS UPDATED", AppConstants.SUCCESS));
@@ -77,7 +69,7 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED_TO_UPDATE_EVENT_STATUS", AppConstants.TASK_FAILED));
     }
 
-    @PatchMapping("/notification-removal/{notificationId}")
+    @PutMapping("/notification-removal/{notificationId}")
     public ResponseEntity<?> removeNotification(@PathVariable int notificationId, HttpServletRequest request){
         if(memberServices.removeNotification(notificationId, request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
