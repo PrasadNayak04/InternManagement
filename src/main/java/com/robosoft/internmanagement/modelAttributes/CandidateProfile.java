@@ -32,7 +32,9 @@ public class CandidateProfile {
     private String gender;
     @NotBlank
     private String position;
+    @Min(value = 0)
     private int expYear;
+    @Min(value = 0)
     private int expMonth;
     @NotBlank
     private String candidateType;

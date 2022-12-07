@@ -1,16 +1,19 @@
 package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.constants.AppConstants;
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.Application;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.AssignBoardPage;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 @Service
 @ControllerAdvice
@@ -24,6 +27,18 @@ public class OrganizerService implements OrganizerServices
 
     @Autowired
     private CandidateService candidateService;
+
+    public List<?> assignedCandidates(HttpServletRequest request)
+    {
+        try {
+            String query = "select candidateId, emailId,name, mobileNumber, position as designation, jobLocation as location from candidatesprofile  inner join assignboard using(candidateId) where status = 'NEW' and organizeremail = ? and candidatesprofile.deleted = 0 and assignboard.deleted = 0";
+            return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Application.class),  memberService.getUserNameFromRequest(request));
+        }catch (Exception e)
+        {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
     public ResponseData<?> takeInterview(AssignBoard board, HttpServletRequest request){
 

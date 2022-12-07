@@ -1,6 +1,6 @@
 package com.robosoft.internmanagement.controller;
 
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.CandidateProfile;
 import com.robosoft.internmanagement.service.CandidateServices;
 import org.springframework.beans.factory.annotation.Autowired;

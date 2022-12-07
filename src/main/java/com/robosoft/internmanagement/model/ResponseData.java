@@ -1,5 +1,6 @@
-package com.robosoft.internmanagement.exception;
+package com.robosoft.internmanagement.model;
 
+import com.robosoft.internmanagement.exception.Result;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 

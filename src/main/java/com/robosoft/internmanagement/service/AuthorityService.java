@@ -2,7 +2,7 @@ package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.DatabaseException;
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.Application;
 import com.robosoft.internmanagement.model.MemberModel;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
@@ -76,7 +76,7 @@ public class AuthorityService implements AuthorityServices {
     }
 
     public List<Application> getApplicants() {
-        query = "select candidateId, imageUrl, emailId, mobileNumber, designation,location,date from applications inner join candidatesprofile using(candidateId) inner join documents using(candidateId) where candidateId NOT IN (select candidateId from assignboard where assignboard.deleted = 0) and applications.deleted = 0 and documents.deleted = 0 and candidatesprofile.deleted = 0";
+        query = "select candidateId, emailId, name, imageUrl, mobileNumber, designation,location,date from applications inner join candidatesprofile using(candidateId) inner join documents using(candidateId) where candidateId NOT IN (select candidateId from assignboard where assignboard.deleted = 0) and applications.deleted = 0 and documents.deleted = 0 and candidatesprofile.deleted = 0";
         return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Application.class));
     }
 

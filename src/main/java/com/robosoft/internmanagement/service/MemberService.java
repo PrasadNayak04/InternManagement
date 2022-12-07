@@ -2,7 +2,7 @@ package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.DatabaseException;
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Event;
@@ -251,18 +251,12 @@ public class MemberService implements MemberServices
 
     }
 
-    public PageData<?> getNotifications(int pageNo, int limit, HttpServletRequest request){
-        int offset = (pageNo - 1) * limit;
-        int totalCount = 0;
+    public List<?> getNotifications(HttpServletRequest request){
         try {
-            if (pageNo == 1) {
-                query = "select count(*) from notifications where emailId = ? and deleted =0";
-                totalCount = jdbcTemplate.queryForObject(query, Integer.class, getUserNameFromRequest(request));
-            }
-            query = "select notificationId, message, date, type from notifications where emailId = ? and deleted =0 order by notificationId desc limit ?, ?";
-            List<Notification> notifications = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Notification.class), getUserNameFromRequest(request), offset, limit);
+            query = "select notificationId, message, date, type from notifications where emailId = ? and deleted =0 order by notificationId desc";
+            List<Notification> notifications = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Notification.class), getUserNameFromRequest(request));
 
-            return new PageData<>(totalCount, notifications.size(), notifications);
+            return notifications;
         } catch (Exception e) {
             return null;
         }

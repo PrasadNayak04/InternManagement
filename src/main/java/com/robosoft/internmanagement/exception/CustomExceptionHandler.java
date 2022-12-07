@@ -1,7 +1,7 @@
 package com.robosoft.internmanagement.exception;
 
 import com.robosoft.internmanagement.constants.AppConstants;
-import org.springframework.dao.EmptyResultDataAccessException;
+import com.robosoft.internmanagement.model.ResponseData;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;

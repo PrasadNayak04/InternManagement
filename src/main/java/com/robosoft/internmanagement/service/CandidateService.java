@@ -3,7 +3,7 @@ package com.robosoft.internmanagement.service;
 import com.cloudinary.utils.ObjectUtils;
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.FileEmptyException;
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.*;
 import com.robosoft.internmanagement.service.jwtSecurity.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;

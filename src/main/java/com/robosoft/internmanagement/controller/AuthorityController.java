@@ -1,7 +1,7 @@
 package com.robosoft.internmanagement.controller;
 
 import com.robosoft.internmanagement.constants.AppConstants;
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.Application;
 import com.robosoft.internmanagement.model.MemberModel;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
@@ -37,12 +37,16 @@ public class AuthorityController {
     @GetMapping("/available-recruiters")
     public ResponseEntity<?> getAllRecruiters() {
         List<MemberModel> memberModels = authorityServices.getAllRecruiters();
+        if(memberModels.size() == 0)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(memberModels, AppConstants.NO_RESULT_SUCCESS));
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(memberModels, AppConstants.SUCCESS));
     }
 
     @GetMapping("/applicants")
     public ResponseEntity<?> allApplicants() {
         List<Application> applications = authorityServices.getApplicants();
+        if(applications.size() == 0)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(applications, AppConstants.NO_RESULT_SUCCESS));
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(applications, AppConstants.SUCCESS));
     }
 

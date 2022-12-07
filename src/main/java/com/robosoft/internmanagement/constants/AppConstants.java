@@ -15,4 +15,6 @@ public class AppConstants {
 
     public static final Result SUCCESS = new Result("SUCCESS", "Successful", "T");
 
+    public static final Result NO_RESULT_SUCCESS = new Result("SUCCESS", "Empty set result", "T");
+
 }

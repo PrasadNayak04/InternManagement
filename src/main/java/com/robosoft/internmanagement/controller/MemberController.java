@@ -1,10 +1,9 @@
 package com.robosoft.internmanagement.controller;
 
 import com.robosoft.internmanagement.constants.AppConstants;
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.LoggedProfile;
 import com.robosoft.internmanagement.model.NotificationDisplay;
-import com.robosoft.internmanagement.model.PageData;
 import com.robosoft.internmanagement.modelAttributes.Event;
 import com.robosoft.internmanagement.service.MemberServices;
 import com.robosoft.internmanagement.service.StorageServices;
@@ -22,6 +21,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
 @RestController
 @CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ="http://localhost:4200")
@@ -42,7 +42,7 @@ public class MemberController {
     }
 
     @GetMapping("/notification-display")
-    public ResponseEntity<?> getNotifications(HttpServletRequest request)
+    public ResponseEntity<?> getNotificationsDisplay(HttpServletRequest request)
     {
         NotificationDisplay notificationDisplay = memberServices.notification(request);
         if(notificationDisplay == null){
@@ -52,14 +52,12 @@ public class MemberController {
     }
 
     @GetMapping("/notifications")
-    public ResponseEntity<?> getNotifications(@RequestParam int pageNo, @RequestParam int limit, HttpServletRequest request){
-        if(!memberServices.validPageDetails(pageNo, limit)){
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("INVALID PAGE DETAILS", AppConstants.INVALID_INFORMATION));
-        }
-        PageData<?> pageData = memberServices.getNotifications(pageNo, limit, request);
-        if(pageData == null)
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(pageData, AppConstants.RECORD_NOT_EXIST));
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(pageData, AppConstants.SUCCESS));
+    public ResponseEntity<?> getNotifications(HttpServletRequest request){
+
+        List<?> notifications = memberServices.getNotifications(request);
+        if(notifications.size() == 0)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notifications, AppConstants.NO_RESULT_SUCCESS));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notifications, AppConstants.SUCCESS));
 
     }
 
@@ -77,25 +75,6 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("INVITATION_STATUS UPDATED", AppConstants.SUCCESS));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED_TO_UPDATE_EVENT_STATUS", AppConstants.TASK_FAILED));
-    }
-
-    @GetMapping("/fetch/{folderName}/{fileName}")
-    public ResponseEntity<?> getFile(@PathVariable String folderName, @PathVariable String fileName, HttpServletRequest request) throws IOException {
-        final String filePath = "src\\main\\resources\\static\\documents\\" + folderName + "\\" + fileName;
-        Path path = Paths.get(filePath);
-        Resource resource;
-        try {
-            resource = new UrlResource(path.toUri());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        }
-
-        String contentType = storageServices.getContentType(request, resource, fileName);
-
-        return ResponseEntity.ok().contentType(MediaType.parseMediaType(contentType))
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
-                .body(resource);
     }
 
     @PatchMapping("/notification-removal/{notificationId}")

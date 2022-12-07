@@ -1,6 +1,6 @@
 package com.robosoft.internmanagement.service;
 
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.CandidateProfile;
 
 import javax.servlet.http.HttpServletRequest;

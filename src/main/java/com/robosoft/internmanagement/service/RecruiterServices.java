@@ -1,6 +1,6 @@
 package com.robosoft.internmanagement.service;
 
-import com.robosoft.internmanagement.exception.ResponseData;
+import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Education;
@@ -30,7 +30,7 @@ public interface RecruiterServices
 
     int cvCount(HttpServletRequest request);
 
-    PageData<?> cvAnalysisPage(Date date, int pageNo, int limit);
+    List<?> cvAnalysisPage(Date date);
 
     CvAnalysis searchDesignation(String designation);
 
@@ -52,23 +52,23 @@ public interface RecruiterServices
 
     String getLastJobPosition(int candidateId);
 
-    PageData<?> getProfileBasedOnStatus(String designation, String status, int pageNo, int limit, HttpServletRequest request);
+    List<?> getProfileBasedOnStatus(String designation, String status, HttpServletRequest request);
 
     List<Application> getNotAssignedApplicants(HttpServletRequest request);
 
     ResponseData<?> assignOrganizer(AssignBoard assignBoard, HttpServletRequest request);
 
-    PageData<?> getAssignBoardPage(int pageNo, int limit, HttpServletRequest request);
+    List<?> getAssignBoardPage(HttpServletRequest request);
 
-    PageData<?> getRejectedCvPage(int pageNo, int limit, HttpServletRequest request);
+    List<?> getRejectedCvPage(HttpServletRequest request);
 
     Invite getInviteInfo(HttpServletRequest request);
 
-    PageData<?> getByDay(Date date, int pageNo, int limit, HttpServletRequest request);
+    List<?> getByDay(Date date, HttpServletRequest request);
 
-    PageData<?> getByMonth(Date date, int pageNo, int limit, HttpServletRequest request);
+    List<?> getByMonth(Date date, HttpServletRequest request);
 
-    PageData<?> getByYear(Date date, int pageNo, int limit, HttpServletRequest request);
+    List<?> getByYear(Date date, HttpServletRequest request);
 
     List<SentInvite> searchInvites(int value, Date date, String name, HttpServletRequest request);
 }
