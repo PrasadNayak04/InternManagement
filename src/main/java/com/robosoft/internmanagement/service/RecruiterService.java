@@ -321,9 +321,6 @@ public class RecruiterService implements RecruiterServices {
             if (!candidateService.isVacantPosition(memberService.getAssignBoardPageDetails(assignBoard).getDesignation()))
                 return new ResponseData<>("FAILED", AppConstants.REQUIREMENTS_FAILED);
 
-            if (organizerAssigned(assignBoard, currentUser))
-                return new ResponseData<>("FAILED", AppConstants.RECORD_ALREADY_EXIST);
-
             query = "select ? < curdate()";
             int validDate = jdbcTemplate.queryForObject(query, Integer.class, assignBoard.getInterviewDate());
             if(validDate == 1)
@@ -349,12 +346,6 @@ public class RecruiterService implements RecruiterServices {
         } catch (Exception e) {
             throw new DatabaseException(AppConstants.RECORD_NOT_EXIST);
         }
-    }
-
-    public boolean organizerAssigned(AssignBoard assignBoard, String currentUser) {
-        query = "select count(candidateId) from assignboard where candidateId = ? and recruiterEmail = ? and status = 'NEW' and deleted = 0";
-        int count = jdbcTemplate.queryForObject(query, Integer.class, assignBoard.getCandidateId(), currentUser);
-        return count > 0;
     }
 
     public boolean rejectAssignedCandidate(int candidateId, HttpServletRequest request) {
@@ -410,7 +401,7 @@ public class RecruiterService implements RecruiterServices {
         List<RejectedCv> rejectedCvList = new ArrayList<>();
         try {
 
-            query = "select applications.candidateId, name,imageUrl,applications.location,mobileNumber from documents inner join candidatesprofile using(candidateId) inner join applications using(candidateId) inner join Assignboard using(candidateId) where AssignBoard.status=? and Assignboard.recruiterEmail=? and documents.deleted = 0 and candidatesprofile.deleted = 0 and Assignboard.deleted = 0 and applications.deleted = 0 group by applications.candidateId";
+            query = "select applications.candidateId, name,imageUrl,applications.location,mobileNumber from documents inner join candidatesprofile using(candidateId) inner join applications using(candidateId) inner join assignboard using(candidateId) where assignboard.status=? and assignboard.recruiterEmail=? and documents.deleted = 0 and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and applications.deleted = 0 group by applications.candidateId";
             jdbcTemplate.query(query,
                     (resultSet, no) -> {
                         RejectedCv list = new RejectedCv();

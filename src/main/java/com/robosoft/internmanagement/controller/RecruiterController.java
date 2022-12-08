@@ -17,7 +17,7 @@ import javax.validation.Valid;
 import java.sql.Date;
 import java.util.List;
 
-@CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ="http://localhost:4200")
+@CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000"})
 @RestController
 @RequestMapping(value = "/intern-management/recruiter", produces = "application/json")
 public class RecruiterController
