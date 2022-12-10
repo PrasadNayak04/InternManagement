@@ -1,11 +1,11 @@
 package com.robosoft.internmanagement.controller;
 
 import com.robosoft.internmanagement.constants.AppConstants;
+import com.robosoft.internmanagement.model.LoggedMemberProfile;
 import com.robosoft.internmanagement.model.LoggedProfile;
 import com.robosoft.internmanagement.model.NotificationDisplay;
 import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.Event;
-import com.robosoft.internmanagement.modelAttributes.MemberProfile;
 import com.robosoft.internmanagement.service.MemberServices;
 import com.robosoft.internmanagement.service.StorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -90,7 +92,7 @@ public class MemberController {
     }
 
     @PutMapping("/profile-update")
-    public ResponseEntity<?> updateProfile(@ModelAttribute MemberProfile memberProfile, HttpServletRequest request) {
+    public ResponseEntity<?> updateProfile(@Valid @ModelAttribute LoggedMemberProfile memberProfile, HttpServletRequest request) throws IOException {
         if(memberServices.updateProfile(memberProfile,request)) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
         }

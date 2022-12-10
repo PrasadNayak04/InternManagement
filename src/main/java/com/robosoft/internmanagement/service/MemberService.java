@@ -24,6 +24,8 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class MemberService implements MemberServices
@@ -134,7 +136,7 @@ public class MemberService implements MemberServices
     public LoggedProfile getProfile(HttpServletRequest request)
     {
         try {
-            query = "select name,designation,photoUrl as profileImage from membersprofile where emailId=?";
+            query = "select name,position,designation,mobileNumber,photoUrl as profileImage from membersprofile where emailId=?";
             return jdbcTemplate.queryForObject(query, new BeanPropertyRowMapper<>(LoggedProfile.class), getUserNameFromRequest(request));
         }catch (Exception e){
             return null;
@@ -352,7 +354,8 @@ public class MemberService implements MemberServices
         return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(MemberModel.class));
     }
 
-    public Boolean updateProfile(MemberProfile memberProfile, HttpServletRequest request) {
+    public Boolean updateProfile(LoggedMemberProfile memberProfile, HttpServletRequest request) throws IOException {
+        LoggedProfile loggedProfile =getProfile(request);
         try {
             if(!memberProfile.getPhoto().isEmpty()) {
                 Map uploadResult = storageService.upload(memberProfile.getPhoto().getBytes(), ObjectUtils.asMap("resourcetype", "auto"));
@@ -361,21 +364,47 @@ public class MemberService implements MemberServices
                 jdbcTemplate.update(query, photoRes, getUserNameFromRequest(request));
             }
             if(memberProfile.getMobileNumber()!=0) {
+
+                if(!this.checkMobileNumber(memberProfile.getMobileNumber())){
+                    throw new Exception("invalid mobile number..");
+                }
                 query = "update membersprofile set mobileNumber = ? where emailId = ? and deleted = 0";
                 jdbcTemplate.update(query, memberProfile.getMobileNumber(), getUserNameFromRequest(request));
             }
-            if(!memberProfile.getName().isEmpty()) {
-                query = "update membersprofile set name = ? where emailId = ? and deleted = 0";
-                jdbcTemplate.update(query, memberProfile.getName(), getUserNameFromRequest(request));
+            if(memberProfile.getName()!=null) {
+                if(!checkNameValidity(memberProfile.getName())) {
+                    throw new Exception("invalid name..");
+                }
+                    query = "update membersprofile set name = ? where emailId = ? and deleted = 0";
+                    jdbcTemplate.update(query, memberProfile.getName(), getUserNameFromRequest(request));
             }
-            if(!memberProfile.getDesignation().isEmpty()) {
+            if(memberProfile.getDesignation()!=null) {
+                if(!checkNameValidity(memberProfile.getName())) {
+                    throw new Exception("invalid designation..");
+                }
                 query = "update membersprofile set designation = ? where emailId = ? and deleted = 0";
                 jdbcTemplate.update(query, memberProfile.getDesignation(), getUserNameFromRequest(request));
             }
             return true;
         } catch (Exception e) {
+            query = "update membersprofile set photoUrl = ?,mobileNumber = ?,name = ?, designation = ? where emailId = ? and deleted = 0";
+            jdbcTemplate.update(query, loggedProfile.getProfileImage(),loggedProfile.getMobileNumber(),loggedProfile.getName(),loggedProfile.getDesignation(), getUserNameFromRequest(request));
+            e.printStackTrace();
             return false;
         }
+    }
+
+
+    public boolean checkNameValidity(String name){
+        Pattern pattern = Pattern.compile("[a-zA-Z( )]+");
+        Matcher matcher = pattern.matcher(name);
+        return matcher.matches();
+    }
+
+    public boolean checkMobileNumber(long mobileNumber){
+        Pattern pattern = Pattern.compile("^[1-9][0-9]{9}$");
+        Matcher matcher = pattern.matcher(String.valueOf(mobileNumber));
+        return matcher.matches();
     }
 
 }

@@ -1,15 +1,12 @@
 package com.robosoft.internmanagement.service;
 
-import com.robosoft.internmanagement.model.ResponseData;
-import com.robosoft.internmanagement.model.LoggedProfile;
-import com.robosoft.internmanagement.model.MemberModel;
-import com.robosoft.internmanagement.model.NotificationDisplay;
+import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.Event;
 import com.robosoft.internmanagement.modelAttributes.Member;
 import com.robosoft.internmanagement.modelAttributes.MemberProfile;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.List;
 
 public interface MemberServices
@@ -45,5 +42,5 @@ public interface MemberServices
     boolean removeNotification(int notificationId, HttpServletRequest request);
 
     List<?> getAllMembers();
-    Boolean updateProfile(MemberProfile memberProfile, HttpServletRequest request);
+    Boolean updateProfile(LoggedMemberProfile memberProfile, HttpServletRequest request) throws IOException;
 }
