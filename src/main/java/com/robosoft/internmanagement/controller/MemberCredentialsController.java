@@ -77,10 +77,10 @@ public class MemberCredentialsController {
             throw new Exception("USER_DISABLED", e);
         }
         catch (BadCredentialsException e) {
-            return ResponseEntity.badRequest().body(new ResponseData<>("LOGIN_FAILED", AppConstants.INVALID_INFORMATION));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("LOGIN_FAILED", AppConstants.INVALID_INFORMATION));
         }
         catch (JwtTokenException jwtTokenException){
-            return ResponseEntity.badRequest().body(new ResponseData<>(jwtTokenException.getMessage(), AppConstants.INVALID_INFORMATION));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(jwtTokenException.getMessage(), AppConstants.INVALID_INFORMATION));
         }
         catch (Exception e) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("LOGIN FAILED", AppConstants.TASK_FAILED));

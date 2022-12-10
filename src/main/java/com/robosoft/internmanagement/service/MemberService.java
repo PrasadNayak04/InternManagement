@@ -1,5 +1,6 @@
 package com.robosoft.internmanagement.service;
 
+import com.cloudinary.utils.ObjectUtils;
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.DatabaseException;
 import com.robosoft.internmanagement.model.ResponseData;
@@ -11,13 +12,18 @@ import com.robosoft.internmanagement.modelAttributes.MemberProfile;
 import com.robosoft.internmanagement.service.jwtSecurity.BeanStore;
 import com.robosoft.internmanagement.service.jwtSecurity.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class MemberService implements MemberServices
@@ -339,6 +345,37 @@ public class MemberService implements MemberServices
         String query = "update notifications set deleted = 1 where notificationId = ? and emailId = ? and deleted = 0";
         int count = jdbcTemplate.update(query, notificationId, getUserNameFromRequest(request));
         return count > 0;
+    }
+
+    public List<?> getAllMembers(){
+        String query = "select emailId, name, photoUrl from membersprofile where deleted = 0";
+        return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(MemberModel.class));
+    }
+
+    public Boolean updateProfile(MemberProfile memberProfile, HttpServletRequest request) {
+        try {
+            if(!memberProfile.getPhoto().isEmpty()) {
+                Map uploadResult = storageService.upload(memberProfile.getPhoto().getBytes(), ObjectUtils.asMap("resourcetype", "auto"));
+                String photoRes = uploadResult.get("url").toString();
+                String query = "update membersprofile set photoUrl = ? where emailId = ? and deleted = 0";
+                jdbcTemplate.update(query, photoRes, getUserNameFromRequest(request));
+            }
+            if(memberProfile.getMobileNumber()!=0) {
+                query = "update membersprofile set mobileNumber = ? where emailId = ? and deleted = 0";
+                jdbcTemplate.update(query, memberProfile.getMobileNumber(), getUserNameFromRequest(request));
+            }
+            if(!memberProfile.getName().isEmpty()) {
+                query = "update membersprofile set name = ? where emailId = ? and deleted = 0";
+                jdbcTemplate.update(query, memberProfile.getName(), getUserNameFromRequest(request));
+            }
+            if(!memberProfile.getDesignation().isEmpty()) {
+                query = "update membersprofile set designation = ? where emailId = ? and deleted = 0";
+                jdbcTemplate.update(query, memberProfile.getDesignation(), getUserNameFromRequest(request));
+            }
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
 }

@@ -24,7 +24,7 @@ public class OrganizerController
     public ResponseEntity<?> getAllCandidates(HttpServletRequest request){
         List<?> candidates = organizerServices.assignedCandidates(request);
         if(candidates.size() == 0)
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("Failed", AppConstants.INVALID_INFORMATION));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(candidates, AppConstants.NO_RESULT_SUCCESS));
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(candidates, AppConstants.SUCCESS));
     }
 

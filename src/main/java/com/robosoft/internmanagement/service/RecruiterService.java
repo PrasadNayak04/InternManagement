@@ -368,14 +368,22 @@ public class RecruiterService implements RecruiterServices {
     public boolean reRecruitCandidate(int candidateId, HttpServletRequest request) {
         String query = "update assignboard set status='ASSIGNED', organizerEmail = null, organizerAssignDate = null, interviewDate = null where candidateId=? and recruiterEmail=? and status=? and deleted = 0";
         int status = jdbcTemplate.update(query, candidateId, memberService.getUserNameFromRequest(request), "REJECTED");
-        return status >= 1;
+        query = "select resultId from results where candidateId = ? and deleted = 0 order by candidateId asc limit 1";
+        try {
+            int res = jdbcTemplate.queryForObject(query, Integer.class);
+            query = "update results set deleted = 1 where resultId = ? and deleted = 0";
+            jdbcTemplate.update(query, res);
+            return status >= 1;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     public boolean deleteCandidate(int candidateId, HttpServletRequest request) {
         query = "select count(*) from candidatesprofile where candidateId = ? and deleted = 1";
         if (jdbcTemplate.queryForObject(query, Integer.class, candidateId) > 0)
             return false;
-        String query = "update candidatesprofile, documents, educations, workhistories, links, applications, assignboard set candidatesprofile.deleted=1, educations.deleted=1, workhistories.deleted=1, documents.deleted=1, links.deleted=1, applications.deleted=1, assignboard.deleted=1 where candidatesprofile.candidateId=? and documents.candidateId=? and educations.candidateId=? and workhistories.candidateId=? and links.candidateId=? and applications.candidateId=? and assignboard.candidateId=? and recruiterEmail=? and assignboard.status = 'REJECTED'";
+        String query = "update candidatesprofile, documents, educations, workhistories, links, applications, address, assignboard set candidatesprofile.deleted=1, address.deleted=1, educations.deleted=1, workhistories.deleted=1, documents.deleted=1, links.deleted=1, applications.deleted=1, assignboard.deleted=1 where candidatesprofile.candidateId=? and documents.candidateId=? and educations.candidateId=? and workhistories.candidateId=? and links.candidateId=? and applications.candidateId=? and assignboard.candidateId=? and address.candidateId = ? and recruiterEmail=? and assignboard.status = 'REJECTED'";
         int status = jdbcTemplate.update(query, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId, memberService.getUserNameFromRequest(request));
         query = "update results, assignboard set results.deleted = 1 where results.candidateId=? and assignboard.recruiterEmail=? and results.candidateId = assignboard.candidateId";
         jdbcTemplate.update(query, candidateId, memberService.getUserNameFromRequest(request));

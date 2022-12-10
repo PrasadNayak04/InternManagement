@@ -5,6 +5,7 @@ import com.robosoft.internmanagement.model.LoggedProfile;
 import com.robosoft.internmanagement.model.NotificationDisplay;
 import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.Event;
+import com.robosoft.internmanagement.modelAttributes.MemberProfile;
 import com.robosoft.internmanagement.service.MemberServices;
 import com.robosoft.internmanagement.service.StorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,6 +44,17 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notificationDisplay, AppConstants.SUCCESS));
     }
 
+    @GetMapping("/members")
+    public ResponseEntity<?> getAllMembers()
+    {
+        List<?> members = memberServices.getAllMembers();
+
+       if(members.size() == 0)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(members, AppConstants.NO_RESULT_SUCCESS));
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(members, AppConstants.SUCCESS));
+    }
+
     @GetMapping("/notifications")
     public ResponseEntity<?> getNotifications(HttpServletRequest request){
 
@@ -74,6 +86,14 @@ public class MemberController {
         if(memberServices.removeNotification(notificationId, request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
 
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
+    }
+
+    @PutMapping("/profile-update")
+    public ResponseEntity<?> updateProfile(@ModelAttribute MemberProfile memberProfile, HttpServletRequest request) {
+        if(memberServices.updateProfile(memberProfile,request)) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
+        }
         return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
     }
 

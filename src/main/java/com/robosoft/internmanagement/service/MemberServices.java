@@ -7,6 +7,7 @@ import com.robosoft.internmanagement.model.NotificationDisplay;
 import com.robosoft.internmanagement.modelAttributes.Event;
 import com.robosoft.internmanagement.modelAttributes.Member;
 import com.robosoft.internmanagement.modelAttributes.MemberProfile;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -42,4 +43,7 @@ public interface MemberServices
     boolean validPageDetails(int pageNo, Integer limit);
 
     boolean removeNotification(int notificationId, HttpServletRequest request);
+
+    List<?> getAllMembers();
+    Boolean updateProfile(MemberProfile memberProfile, HttpServletRequest request);
 }
