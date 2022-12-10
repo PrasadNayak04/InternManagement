@@ -11,12 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.Map;
+import java.util.List;
 
 @CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000"})
 @RestController
@@ -44,5 +43,14 @@ public class CandidateController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(test.getList(), AppConstants.SUCCESS));
     }
 
+    @GetMapping("/openings")
+    public ResponseEntity<?> availableDesignation() {
+        List<String> designations = candidateServices.availableDesignations();
+        if(designations.size()>0) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(designations, AppConstants.SUCCESS));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(designations, AppConstants.NO_RESULT_SUCCESS));
+
+    }
 
 }

@@ -4,6 +4,7 @@ import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.CandidateProfile;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 public interface CandidateServices
 {
@@ -17,6 +18,8 @@ public interface CandidateServices
     boolean isVacantPositionLocation(String position, String location);
 
     boolean alreadyShortlisted(String emailId);
+
+    List<String> availableDesignations();
 
 
 }

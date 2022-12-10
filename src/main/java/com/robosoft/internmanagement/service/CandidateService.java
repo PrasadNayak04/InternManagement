@@ -162,4 +162,9 @@ public class CandidateService implements CandidateServices
         }
     }
 
+    public List<String> availableDesignations() {
+        String query = "select designation from technologies where status = ? and deleted = 0";
+        return jdbcTemplate.queryForList(query, String.class, "ACTIVE");
+    }
+
 }
