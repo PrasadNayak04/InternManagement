@@ -88,7 +88,7 @@ public class MemberController {
         if(memberServices.removeNotification(notificationId, request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
 
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
     }
 
     @PutMapping("/profile-update")
@@ -96,7 +96,7 @@ public class MemberController {
         if(memberServices.updateProfile(memberProfile,request)) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
         }
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
     }
 
 }
