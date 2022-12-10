@@ -8,6 +8,7 @@ import com.robosoft.internmanagement.modelAttributes.Education;
 import com.robosoft.internmanagement.modelAttributes.Link;
 import com.robosoft.internmanagement.modelAttributes.WorkHistory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -525,6 +526,13 @@ public class RecruiterService implements RecruiterServices {
             return null;
         }
         return null;
+    }
+
+    public List<AssignBoardPage> assignBoardSearch(String location,HttpServletRequest request) {
+        String currentUser = memberService.getUserNameFromRequest(request);
+            query = "select candidatesprofile.candidateId,candidatesprofile.name,applications.designation,applications.location,assignboard.assignDate,membersprofile.name as organizer  from membersprofile inner join assignboard on membersprofile.emailId=organizerEmail inner join applications on assignboard.candidateId=applications.candidateId inner join candidatesprofile on candidatesprofile.candidateId=applications.candidateId where recruiterEmail=? and applications.location REGEXP ? and membersprofile.deleted = 0 and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and applications.deleted = 0";
+            List<AssignBoardPage> assignBoardPages = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(AssignBoardPage.class), currentUser, location);
+            return assignBoardPages;
     }
 
 }

@@ -71,4 +71,5 @@ public interface RecruiterServices
     List<?> getByYear(Date date, HttpServletRequest request);
 
     List<SentInvite> searchInvites(int value, Date date, String name, HttpServletRequest request);
+    List<AssignBoardPage> assignBoardSearch(String location,HttpServletRequest request);
 }

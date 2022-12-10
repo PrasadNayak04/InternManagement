@@ -270,4 +270,13 @@ public class RecruiterController
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(list, AppConstants.SUCCESS));
     }
 
+    @GetMapping("/assign-board-search")
+    public ResponseEntity<?> searchAssignBoardByLocation(@RequestParam String location,HttpServletRequest request) {
+        List<AssignBoardPage> assignBoardPages = recruiterServices.assignBoardSearch(location, request);
+        if(assignBoardPages.size()>0) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(assignBoardPages, AppConstants.SUCCESS));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(assignBoardPages, AppConstants.RECORD_NOT_EXIST));
+    }
+
 }
