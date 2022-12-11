@@ -114,31 +114,28 @@ public class AuthorityService implements AuthorityServices {
     }
 
     public List<?> viewOpenings() {
+        System.out.println("inside view openings");
         List<Openings> openingsList = new ArrayList<>();
-        query = "select designation locations";
-        jdbcTemplate.query(query,
+        query = "select distinct(designation) from locations";
+    try{
+        openingsList =  jdbcTemplate.query(query,
                 (resultSet, no) -> {
-            Openings openings =new Openings();
-            Location location = new Location();
-
-            openings.setDesignation(resultSet.getString(1));
-            location.setLocation(getLocation(resultSet.getString(1)));
-            location.setVacancy(getVacancy(resultSet.getString(1)));
-            openings.setLocation(location);
-            openingsList.add(openings);
-            return openings;
-        });
+                    Openings openings =new Openings();
+                    openings.setDesignation(resultSet.getString(1));
+                    List<Location> locations = getOpening(openings.getDesignation());
+                    openings.setLocation(locations);
+                    return openings;
+                });
+    }catch(Exception exception){
+        exception.printStackTrace();
+    }
         return openingsList;
     }
 
-    public List<String> getLocation(String designation) {
-        query = "select location from locations where designation = ?";
-        return jdbcTemplate.queryForList(query,String.class,designation);
+    public List<Location> getOpening(String designation) {
+        return jdbcTemplate.query("select location,vacancy from locations where designation = ? and deleted = 0",
+                new BeanPropertyRowMapper<>(Location.class),designation);
     }
 
-    public List<Integer> getVacancy(String designation) {
-        query = "select vacancy from locations where designation = ?";
-        return jdbcTemplate.queryForList(query,Integer.class,designation);
-    }
 
 }

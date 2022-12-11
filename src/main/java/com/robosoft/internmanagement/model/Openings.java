@@ -3,12 +3,16 @@ package com.robosoft.internmanagement.model;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.ToString;
+
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @RequiredArgsConstructor
+@ToString
 public class Openings {
     private String designation;
-    private Location location;
+    private List<Location> location;
 
 }
