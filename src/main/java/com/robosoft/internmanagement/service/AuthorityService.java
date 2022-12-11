@@ -72,7 +72,7 @@ public class AuthorityService implements AuthorityServices {
 
     @Override
     public List<MemberModel> getAllRecruiters() {
-        query = "select emailId, name, photoUrl from membersprofile where position = 'RECRUITER'";
+        query = "select emailId, name, photoUrl, count(assignboard.recruiterEmail) as applicantsCount from membersprofile left join assignboard on membersprofile.emailId = assignboard.recruiterEmail where position = 'RECRUITER' group by membersprofile.emailId";
         return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(MemberModel.class));
     }
 

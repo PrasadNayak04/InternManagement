@@ -19,6 +19,7 @@ public class MemberModel
     private String designation;
     private String position;
     private String token;
+    private int applicantsCount;
 
     //Register response
     public MemberModel(String emailId, String name, String photoUrl, Long mobileNumber, String designation, String position) {
