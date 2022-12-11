@@ -8,7 +8,6 @@ import com.robosoft.internmanagement.modelAttributes.Education;
 import com.robosoft.internmanagement.modelAttributes.Link;
 import com.robosoft.internmanagement.modelAttributes.WorkHistory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -139,10 +138,11 @@ public class RecruiterService implements RecruiterServices {
 
     }
 
-    public CvAnalysis searchDesignation(String designation) {
-        query = "select applications.designation,count(applications.designation),date,status from applications inner join technologies using(designation) where applications.designation=? and applications.deleted = 0 and technologies.deleted = 0 group by technologies.designation";
+    public List<?> searchDesignation(String designation) {
+        List<CvAnalysis> cvAnalysisList = new ArrayList<>();
+        query = "select applications.designation,count(applications.designation),date,status from applications inner join technologies using(designation) where applications.designation=? and applications.deleted = 0 and technologies.deleted = 0 group by date";
         try {
-            return jdbcTemplate.queryForObject(query,
+            List<CvAnalysis> cvAnalyses = jdbcTemplate.query(query,
                     (resultSet, no) -> {
                         CvAnalysis cvAnalysis = new CvAnalysis();
                         cvAnalysis.setDesignation(resultSet.getString(1));
@@ -150,8 +150,10 @@ public class RecruiterService implements RecruiterServices {
                         cvAnalysis.setReceivedDate(resultSet.getDate(3));
                         cvAnalysis.setStatus(resultSet.getString(4));
                         cvAnalysis.setLocations(getLocationsByDesignation(designation));
+                        cvAnalysisList.add(cvAnalysis);
                         return cvAnalysis;
                     }, designation);
+            return cvAnalyses;
         } catch (Exception e) {
             e.printStackTrace();
             return null;

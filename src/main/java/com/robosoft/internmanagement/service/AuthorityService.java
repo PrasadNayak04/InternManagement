@@ -2,18 +2,19 @@ package com.robosoft.internmanagement.service;
 
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.DatabaseException;
-import com.robosoft.internmanagement.model.ResponseData;
-import com.robosoft.internmanagement.model.Application;
-import com.robosoft.internmanagement.model.MemberModel;
+import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Technology;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.ResultSet;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -110,6 +111,34 @@ public class AuthorityService implements AuthorityServices {
         } catch (Exception e1) {
             throw new DatabaseException(AppConstants.RECORD_ALREADY_EXIST);
         }
+    }
+
+    public List<?> viewOpenings() {
+        List<Openings> openingsList = new ArrayList<>();
+        query = "select designation locations";
+        jdbcTemplate.query(query,
+                (resultSet, no) -> {
+            Openings openings =new Openings();
+            Location location = new Location();
+
+            openings.setDesignation(resultSet.getString(1));
+            location.setLocation(getLocation(resultSet.getString(1)));
+            location.setVacancy(getVacancy(resultSet.getString(1)));
+            openings.setLocation(location);
+            openingsList.add(openings);
+            return openings;
+        });
+        return openingsList;
+    }
+
+    public List<String> getLocation(String designation) {
+        query = "select location from locations where designation = ?";
+        return jdbcTemplate.queryForList(query,String.class,designation);
+    }
+
+    public List<Integer> getVacancy(String designation) {
+        query = "select vacancy from locations where designation = ?";
+        return jdbcTemplate.queryForList(query,Integer.class,designation);
     }
 
 }

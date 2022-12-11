@@ -62,5 +62,14 @@ public class AuthorityController {
 
     }
 
+    @GetMapping("/available-openings")
+    public ResponseEntity<?> viewOpenings() {
+        List<?> openings = authorityServices.viewOpenings();
+        if(openings.size()>0) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(openings, AppConstants.SUCCESS));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(openings, AppConstants.RECORD_NOT_EXIST));
+    }
+
 }
 

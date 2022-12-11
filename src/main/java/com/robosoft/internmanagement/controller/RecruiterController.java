@@ -112,7 +112,7 @@ public class RecruiterController
     @GetMapping("/search/{designation}")
     public ResponseEntity<?> search(@PathVariable String designation)
     {
-        CvAnalysis cvAnalysis = recruiterServices.searchDesignation(designation);
+        List<?> cvAnalysis = recruiterServices.searchDesignation(designation);
         if(cvAnalysis == null)
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData("NOT FOUND", AppConstants.RECORD_NOT_EXIST));
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData(cvAnalysis, AppConstants.SUCCESS));
