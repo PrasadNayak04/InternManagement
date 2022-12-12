@@ -65,11 +65,32 @@ public class AuthorityController {
     @GetMapping("/available-openings")
     public ResponseEntity<?> viewOpenings() {
         List<?> openings = authorityServices.viewOpenings();
-        if(openings.size()>0) {
+        if(openings.size()>0)
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(openings, AppConstants.SUCCESS));
-        }
+
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(openings, AppConstants.RECORD_NOT_EXIST));
     }
+
+    @GetMapping("/locations")
+    public ResponseEntity<?> getAllLocations(@RequestParam int technologyId){
+        List<?> locations = authorityServices.getAllLocations(technologyId);
+        if(locations == null)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("Technology does not exists", AppConstants.RECORD_NOT_EXIST));
+
+        if(locations.size()>0)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(locations, AppConstants.SUCCESS));
+
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(locations, AppConstants.NO_RESULT_SUCCESS));
+    }
+
+    @PutMapping("/vacancy-updater")
+    public ResponseEntity<?> vacancyUpdate(@RequestParam int locationId,@RequestParam int vacancy)
+    {
+        if(authorityServices.updateLocation(locationId,vacancy))
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("New Vacancy Updated", AppConstants.SUCCESS));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("Record not found", AppConstants.RECORD_NOT_EXIST));
+    }
+
 
 }
 

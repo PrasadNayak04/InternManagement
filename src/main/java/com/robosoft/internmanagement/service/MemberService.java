@@ -330,17 +330,21 @@ public class MemberService implements MemberServices
 
     public boolean deleteExistingCandidate(int candidateId) {
         query = "select count(*) from candidatesprofile where candidateId = ? and deleted = 1";
-        if (jdbcTemplate.queryForObject(query, Integer.class, candidateId) > 0)
+        try {
+            if (jdbcTemplate.queryForObject(query, Integer.class, candidateId) > 0)
+                return false;
+            String query = "update candidatesprofile, documents, educations, workhistories, links, applications set candidatesprofile.deleted=1, educations.deleted=1, workhistories.deleted=1, documents.deleted=1, links.deleted=1, applications.deleted=1 where candidatesprofile.candidateId=? and documents.candidateId=? and educations.candidateId=? and workhistories.candidateId=? and links.candidateId=? and applications.candidateId=?";
+            int status = jdbcTemplate.update(query, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId);
+
+            query = "update assignboard set deleted = 0 where candidateId = ?";
+            jdbcTemplate.update(query, candidateId);
+
+            query = "update results, assignboard set results.deleted = 1 where results.candidateId=? and results.candidateId = assignboard.candidateId";
+            jdbcTemplate.update(query, candidateId);
+            return status >= 1;
+        } catch (Exception e) {
             return false;
-        String query = "update candidatesprofile, documents, educations, workhistories, links, applications set candidatesprofile.deleted=1, educations.deleted=1, workhistories.deleted=1, documents.deleted=1, links.deleted=1, applications.deleted=1 where candidatesprofile.candidateId=? and documents.candidateId=? and educations.candidateId=? and workhistories.candidateId=? and links.candidateId=? and applications.candidateId=?";
-        int status = jdbcTemplate.update(query, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId);
-
-        query = "update assignboard set deleted = 0 where candidateId = ?";
-        jdbcTemplate.update(query, candidateId);
-
-        query = "update results, assignboard set results.deleted = 1 where results.candidateId=? and results.candidateId = assignboard.candidateId";
-        jdbcTemplate.update(query, candidateId);
-        return status >= 1;
+        }
     }
 
     public boolean removeNotification(int notificationId, HttpServletRequest request){
@@ -405,6 +409,11 @@ public class MemberService implements MemberServices
         Pattern pattern = Pattern.compile("^[1-9][0-9]{9}$");
         Matcher matcher = pattern.matcher(String.valueOf(mobileNumber));
         return matcher.matches();
+    }
+
+    public List<?> searchNotifications(String key, HttpServletRequest request){
+        query = "select notificationId, message, date, type from notifications where emailId = ? and message REGEXP ? and deleted =0 order by notificationId desc";
+        return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Notification.class), getUserNameFromRequest(request), key);
     }
 
 }

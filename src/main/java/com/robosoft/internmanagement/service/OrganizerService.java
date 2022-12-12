@@ -43,10 +43,10 @@ public class OrganizerService implements OrganizerServices
     public ResponseData<?> takeInterview(AssignBoard board, HttpServletRequest request){
 
         if(!interviewAssigned(board, request))
-            return new ResponseData<>("FAILED", AppConstants.INVALID_INFORMATION);
+            return new ResponseData<>("No interview records found", AppConstants.INVALID_INFORMATION);
 
         if(memberService.alreadyShortlisted(board.getCandidateId(), request))
-            return new ResponseData<>("FAILED", AppConstants.RECORD_ALREADY_EXIST);
+            return new ResponseData<>("Already shortlisted", AppConstants.RECORD_ALREADY_EXIST);
 
         try{
             AssignBoardPage assignBoard = memberService.getAssignBoardPageDetails(board);
@@ -54,7 +54,7 @@ public class OrganizerService implements OrganizerServices
                 throw new Exception("FAILED");
 
             if (!candidateService.isVacantPosition(assignBoard.getDesignation())){
-                return new ResponseData<>("FAILED", AppConstants.REQUIREMENTS_FAILED);
+                return new ResponseData<>("This position is currently closed/No vacancy available", AppConstants.REQUIREMENTS_FAILED);
             }
 
             if(board.getStatus().equalsIgnoreCase("SHORTLISTED")){

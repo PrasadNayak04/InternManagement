@@ -6,6 +6,7 @@ import com.robosoft.internmanagement.model.LoggedProfile;
 import com.robosoft.internmanagement.model.NotificationDisplay;
 import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.Event;
+import com.robosoft.internmanagement.modelAttributes.EventReaction;
 import com.robosoft.internmanagement.service.MemberServices;
 import com.robosoft.internmanagement.service.StorageServices;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,16 +76,16 @@ public class MemberController {
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("EVENT CREATION FAILED", AppConstants.TASK_FAILED));
     }
 
-    @PutMapping("/event-status-update")
-    public ResponseEntity<?> reactEventInvite(@RequestParam int notificationId, @RequestParam String status, HttpServletRequest request){
-        if(memberServices.reactToEventInvite(notificationId, status, request)) {
+    @PostMapping("/event-status-update")
+    public ResponseEntity<?> reactEventInvite(@RequestBody EventReaction eventReaction, HttpServletRequest request){
+        if(memberServices.reactToEventInvite(eventReaction.getNotificationId(), eventReaction.getStatus(), request)) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("INVITATION_STATUS UPDATED", AppConstants.SUCCESS));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED_TO_UPDATE_EVENT_STATUS", AppConstants.TASK_FAILED));
     }
 
-    @PutMapping("/notification-removal/{notificationId}")
-    public ResponseEntity<?> removeNotification(@PathVariable int notificationId, HttpServletRequest request){
+    @PutMapping("/notification-removal")
+    public ResponseEntity<?> removeNotification(@RequestBody int notificationId, HttpServletRequest request){
         if(memberServices.removeNotification(notificationId, request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
 
@@ -97,6 +98,14 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("SUCCESS", AppConstants.SUCCESS));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED", AppConstants.TASK_FAILED));
+    }
+
+    @GetMapping("/notifications-search")
+    public ResponseEntity<?> searchNotification(@RequestBody String key, HttpServletRequest request){
+        List<?> notifications = memberServices.searchNotifications(key, request);
+        if(notifications.size() > 0)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notifications, AppConstants.RECORD_NOT_EXIST));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notifications, AppConstants.SUCCESS));
     }
 
 }

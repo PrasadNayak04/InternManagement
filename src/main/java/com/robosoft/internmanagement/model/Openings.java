@@ -12,6 +12,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @ToString
 public class Openings {
+
+    private int technologyId;
     private String designation;
     private List<Location> location;
 

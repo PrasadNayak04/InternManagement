@@ -12,6 +12,7 @@ import java.util.List;
 public interface AuthorityServices
 {
     ResponseData<?> addTechnology(Technology technology, HttpServletRequest request);
+
     List<MemberModel> getAllRecruiters();
 
     List<Application> getApplicants();
@@ -19,4 +20,8 @@ public interface AuthorityServices
     ResponseData<String> assignRecruiter(AssignBoard assignBoard, HttpServletRequest request);
 
     List<?> viewOpenings();
+
+    List<?> getAllLocations(int technologyId);
+
+    boolean updateLocation(int locationId, int newVacancy);
 }

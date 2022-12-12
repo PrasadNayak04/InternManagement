@@ -14,7 +14,7 @@ import java.util.List;
 
 @RestController
 @CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000"})
-@RequestMapping(value = "/intern-management/organizer" , produces = "application/json")
+@RequestMapping(value = "/intern-management/organizer")
 public class OrganizerController
 {
     @Autowired

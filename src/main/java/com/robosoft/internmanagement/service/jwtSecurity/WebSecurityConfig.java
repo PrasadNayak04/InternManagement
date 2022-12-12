@@ -46,7 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/intern-management/recruiter/**").hasRole("RECRUITER")
                 .antMatchers("/intern-management/authority/**").hasRole("AUTHORITY")
                 .antMatchers("/intern-management/member/**").hasAnyRole("ORGANIZER", "RECRUITER", "AUTHORITY")
-                .antMatchers(    "/intern-management/candidate/register","/intern-management/member-credentials/**").permitAll()
+                .antMatchers(    "/intern-management/candidate/**","/intern-management/member-credentials/**").permitAll()
                 .and()
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)

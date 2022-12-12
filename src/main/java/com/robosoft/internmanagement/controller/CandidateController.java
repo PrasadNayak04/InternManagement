@@ -1,10 +1,8 @@
 package com.robosoft.internmanagement.controller;
 
-import com.cloudinary.utils.ObjectUtils;
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.modelAttributes.CandidateProfile;
-import com.robosoft.internmanagement.modelAttributes.TestD;
 import com.robosoft.internmanagement.service.CandidateServices;
 import com.robosoft.internmanagement.service.StorageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000"})
@@ -36,11 +33,6 @@ public class CandidateController {
             return ResponseEntity.status(HttpStatus.OK).body(responseData);
 
         return ResponseEntity.status(HttpStatus.OK).body(responseData);
-    }
-
-    @PostMapping("/register1")
-    public ResponseEntity<?> upload(@Valid @ModelAttribute TestD test) throws IOException {
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(test.getList(), AppConstants.SUCCESS));
     }
 
     @GetMapping("/openings")

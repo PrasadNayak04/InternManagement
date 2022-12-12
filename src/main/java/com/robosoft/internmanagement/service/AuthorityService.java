@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -83,14 +84,14 @@ public class AuthorityService implements AuthorityServices {
 
     public ResponseData<String> assignRecruiter(AssignBoard assignBoard, HttpServletRequest request) {
         if(memberService.alreadyShortlisted(assignBoard.getCandidateId(), request))
-            return new ResponseData<>("FAILED", AppConstants.RECORD_ALREADY_EXIST);
+            return new ResponseData<>("Already shortlisted", AppConstants.RECORD_ALREADY_EXIST);
 
         try {
             query = "select position from candidatesprofile where candidateId = ? and deleted = 0";
             String designation = jdbcTemplate.queryForObject(query, String.class, assignBoard.getCandidateId());
 
             if (!candidateService.isVacantPosition(designation)) {
-                return new ResponseData<>("FAILED", AppConstants.REQUIREMENTS_FAILED);
+                return new ResponseData<>("This position is currently closed/No vacancy available", AppConstants.REQUIREMENTS_FAILED);
             }
 
             query = "select name from membersprofile where emailId=? and position=?";
@@ -114,28 +115,41 @@ public class AuthorityService implements AuthorityServices {
     }
 
     public List<?> viewOpenings() {
-        System.out.println("inside view openings");
         List<Openings> openingsList = new ArrayList<>();
-        query = "select distinct(designation) from locations";
-    try{
-        openingsList =  jdbcTemplate.query(query,
-                (resultSet, no) -> {
-                    Openings openings =new Openings();
-                    openings.setDesignation(resultSet.getString(1));
-                    List<Location> locations = getOpening(openings.getDesignation());
-                    openings.setLocation(locations);
-                    return openings;
-                });
-    }catch(Exception exception){
-        exception.printStackTrace();
-    }
+        query = "select technologyId, designation from technologies where deleted = 0";
+        try{
+            openingsList =  jdbcTemplate.query(query,
+                    (resultSet, no) -> {
+                        Openings openings =new Openings();
+                        openings.setTechnologyId(resultSet.getInt(1));
+                        openings.setDesignation(resultSet.getString(2));
+                        List<Location> locations = getOpening(openings.getDesignation());
+                        openings.setLocation(locations);
+                        return openings;
+                    });
+        }catch(Exception exception){
+            exception.printStackTrace();
+            return Arrays.asList();
+        }
         return openingsList;
     }
 
     public List<Location> getOpening(String designation) {
-        return jdbcTemplate.query("select location,vacancy from locations where designation = ? and deleted = 0",
+        return jdbcTemplate.query("select locationId, location,vacancy from locations where designation = ? and deleted = 0",
                 new BeanPropertyRowMapper<>(Location.class),designation);
     }
 
+    public List<?> getAllLocations(int technologyId){
+        query = "select count(technologyId) from technologies where technologyId = ? and deleted = 0";
+        if(jdbcTemplate.queryForObject(query, Integer.class, technologyId) == 0)
+            return null;
+        query = "select locationId, location, locations.vacancy from locations inner join technologies using(designation) where technologyId = ? and technologies.deleted = 0 and locations.deleted = 0";
+        return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Location.class), technologyId);
+    }
+
+    public boolean updateLocation(int locationId, int newVacancy){
+        query = "update locations set vacancy = ? where locationId = ? and deleted = 0";
+        return jdbcTemplate.update(query, newVacancy, locationId) > 0;
+    }
 
 }

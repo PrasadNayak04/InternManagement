@@ -114,7 +114,7 @@ public class RecruiterService implements RecruiterServices {
         }
 
         try {
-            query = "select applications.designation,count(applications.designation),date,status from applications,technologies where applications.designation = technologies.designation and date=? and applications.deleted = 0 and technologies.deleted = 0 group by applications.designation";
+            query = "select applications.designation,count(applications.designation),assignDate,technologies.status from applications inner join assignboard using(candidateId) inner join technologies using(designation) where assignDate=? and applications.deleted = 0 and technologies.deleted = 0 group by applications.designation";
             List<CvAnalysis> cvAnalyses = jdbcTemplate.query(query,
                     (resultSet, no) -> {
                         CvAnalysis cvAnalysis = new CvAnalysis();
@@ -318,11 +318,11 @@ public class RecruiterService implements RecruiterServices {
         String currentUser = memberService.getUserNameFromRequest(request);
 
         if(memberService.alreadyShortlisted(assignBoard.getCandidateId(), request))
-            return new ResponseData<>("FAILED", AppConstants.RECORD_ALREADY_EXIST);
+            return new ResponseData<>("Already shortlisted", AppConstants.RECORD_ALREADY_EXIST);
 
         try {
             if (!candidateService.isVacantPosition(memberService.getAssignBoardPageDetails(assignBoard).getDesignation()))
-                return new ResponseData<>("FAILED", AppConstants.REQUIREMENTS_FAILED);
+                return new ResponseData<>("This position is currently closed/No vacancy available", AppConstants.REQUIREMENTS_FAILED);
 
             query = "select ? < curdate()";
             int validDate = jdbcTemplate.queryForObject(query, Integer.class, assignBoard.getInterviewDate());
@@ -371,26 +371,33 @@ public class RecruiterService implements RecruiterServices {
     public boolean reRecruitCandidate(int candidateId, HttpServletRequest request) {
         String query = "update assignboard set status='ASSIGNED', organizerEmail = null, organizerAssignDate = null, interviewDate = null where candidateId=? and recruiterEmail=? and status=? and deleted = 0";
         int status = jdbcTemplate.update(query, candidateId, memberService.getUserNameFromRequest(request), "REJECTED");
-        query = "select resultId from results where candidateId = ? and deleted = 0 order by candidateId asc limit 1";
+        query = "select resultId from results where candidateId = ? and deleted = 0 order by candidateId desc limit 1";
         try {
-            int res = jdbcTemplate.queryForObject(query, Integer.class);
+            int res = jdbcTemplate.queryForObject(query, Integer.class, candidateId);
+            System.out.println(res);
             query = "update results set deleted = 1 where resultId = ? and deleted = 0";
             jdbcTemplate.update(query, res);
             return status >= 1;
         } catch (Exception e) {
+            e.printStackTrace();
             return false;
         }
     }
 
     public boolean deleteCandidate(int candidateId, HttpServletRequest request) {
-        query = "select count(*) from candidatesprofile where candidateId = ? and deleted = 1";
-        if (jdbcTemplate.queryForObject(query, Integer.class, candidateId) > 0)
+        try {
+            query = "select count(*) from candidatesprofile where candidateId = ? and deleted = 1";
+            if (jdbcTemplate.queryForObject(query, Integer.class, candidateId) > 0)
+                return false;
+            String query = "update candidatesprofile, documents, educations, workhistories, links, applications, address, assignboard set candidatesprofile.deleted=1, address.deleted=1, educations.deleted=1, workhistories.deleted=1, documents.deleted=1, links.deleted=1, applications.deleted=1, assignboard.deleted=1 where candidatesprofile.candidateId=? and documents.candidateId=? and educations.candidateId=? and workhistories.candidateId=? and links.candidateId=? and applications.candidateId=? and assignboard.candidateId=? and address.candidateId = ? and recruiterEmail=? and assignboard.status = 'REJECTED'";
+            int status = jdbcTemplate.update(query, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId, memberService.getUserNameFromRequest(request));
+            query = "update results, assignboard set results.deleted = 1 where results.candidateId=? and assignboard.recruiterEmail=? and results.candidateId = assignboard.candidateId";
+            jdbcTemplate.update(query, candidateId, memberService.getUserNameFromRequest(request));
+            return status >= 1;
+        }catch(Exception e){
+            e.printStackTrace();
             return false;
-        String query = "update candidatesprofile, documents, educations, workhistories, links, applications, address, assignboard set candidatesprofile.deleted=1, address.deleted=1, educations.deleted=1, workhistories.deleted=1, documents.deleted=1, links.deleted=1, applications.deleted=1, assignboard.deleted=1 where candidatesprofile.candidateId=? and documents.candidateId=? and educations.candidateId=? and workhistories.candidateId=? and links.candidateId=? and applications.candidateId=? and assignboard.candidateId=? and address.candidateId = ? and recruiterEmail=? and assignboard.status = 'REJECTED'";
-        int status = jdbcTemplate.update(query, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId, candidateId, memberService.getUserNameFromRequest(request));
-        query = "update results, assignboard set results.deleted = 1 where results.candidateId=? and assignboard.recruiterEmail=? and results.candidateId = assignboard.candidateId";
-        jdbcTemplate.update(query, candidateId, memberService.getUserNameFromRequest(request));
-        return status >= 1;
+        }
     }
 
 
@@ -530,10 +537,10 @@ public class RecruiterService implements RecruiterServices {
         return null;
     }
 
-    public List<AssignBoardPage> assignBoardSearch(String location,HttpServletRequest request) {
+    public List<AssignBoardPage> assignBoardSearch(String key,HttpServletRequest request) {
         String currentUser = memberService.getUserNameFromRequest(request);
-            query = "select candidatesprofile.candidateId,candidatesprofile.name,applications.designation,applications.location,assignboard.assignDate,membersprofile.name as organizer  from membersprofile inner join assignboard on membersprofile.emailId=organizerEmail inner join applications on assignboard.candidateId=applications.candidateId inner join candidatesprofile on candidatesprofile.candidateId=applications.candidateId where recruiterEmail=? and applications.location REGEXP ? and membersprofile.deleted = 0 and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and applications.deleted = 0";
-            List<AssignBoardPage> assignBoardPages = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(AssignBoardPage.class), currentUser, location);
+            query = "select candidatesprofile.candidateId,candidatesprofile.name,applications.designation,applications.location,assignboard.assignDate,membersprofile.name as organizer  from membersprofile inner join assignboard on membersprofile.emailId=organizerEmail inner join applications on assignboard.candidateId=applications.candidateId inner join candidatesprofile on candidatesprofile.candidateId=applications.candidateId where recruiterEmail= ? and applications.location REGEXP ? OR candidatesprofile.name REgexp ? OR applications.designation REGEXP ? OR membersprofile.name REGEXP ? and membersprofile.deleted = 0 and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and applications.deleted = 0";
+            List<AssignBoardPage> assignBoardPages = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(AssignBoardPage.class), currentUser, key, key, key, key);
             return assignBoardPages;
     }
 

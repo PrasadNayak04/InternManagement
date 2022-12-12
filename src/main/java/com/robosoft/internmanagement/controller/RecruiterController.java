@@ -19,7 +19,7 @@ import java.util.List;
 
 @CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000"})
 @RestController
-@RequestMapping(value = "/intern-management/recruiter", produces = "application/json")
+@RequestMapping(value = "/intern-management/recruiter")
 public class RecruiterController
 {
     @Autowired
@@ -39,16 +39,16 @@ public class RecruiterController
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK FAILED", AppConstants.TASK_FAILED));
     }
 
-    @PutMapping("/candidate-recruitment/{candidateId}")
-    public ResponseEntity<?> reRecruitCandidate(@PathVariable int candidateId, HttpServletRequest request){
+    @PutMapping("/candidate-recruitment")
+    public ResponseEntity<?> reRecruitCandidate(@RequestBody int candidateId, HttpServletRequest request){
         if(recruiterServices.reRecruitCandidate(candidateId,request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
 
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK FAILED", AppConstants.TASK_FAILED));
     }
 
-    @PutMapping("/candidate-deletion/{candidateId}")
-    public ResponseEntity<?> deleteCandidate(@PathVariable int candidateId, HttpServletRequest request){
+    @PutMapping("/candidate-deletion")
+    public ResponseEntity<?> deleteCandidate(@RequestBody int candidateId, HttpServletRequest request){
         if(recruiterServices.deleteCandidate(candidateId,request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
 
@@ -271,8 +271,8 @@ public class RecruiterController
     }
 
     @GetMapping("/assign-board-search")
-    public ResponseEntity<?> searchAssignBoardByLocation(@RequestParam String location,HttpServletRequest request) {
-        List<AssignBoardPage> assignBoardPages = recruiterServices.assignBoardSearch(location, request);
+    public ResponseEntity<?> searchAssignBoardByLocation(@RequestParam String key,HttpServletRequest request) {
+        List<AssignBoardPage> assignBoardPages = recruiterServices.assignBoardSearch(key, request);
         if(assignBoardPages.size()>0) {
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(assignBoardPages, AppConstants.SUCCESS));
         }
