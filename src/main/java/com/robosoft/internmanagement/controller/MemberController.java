@@ -42,7 +42,7 @@ public class MemberController {
     {
         NotificationDisplay notificationDisplay = memberServices.notification(request);
         if(notificationDisplay == null){
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notificationDisplay, AppConstants.RECORD_NOT_EXIST));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("No recent notifications", AppConstants.RECORD_NOT_EXIST));
         }
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notificationDisplay, AppConstants.SUCCESS));
     }
@@ -63,7 +63,7 @@ public class MemberController {
 
         List<?> notifications = memberServices.getNotifications(request);
         if(notifications.size() == 0)
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notifications, AppConstants.NO_RESULT_SUCCESS));
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("No recent notifications", AppConstants.NO_RESULT_SUCCESS));
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notifications, AppConstants.SUCCESS));
 
     }

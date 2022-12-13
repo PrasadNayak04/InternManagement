@@ -21,5 +21,7 @@ public interface CandidateServices
 
     List<String> availableDesignations();
 
+    List<?> getLocationsByDesignation(String designation);
+
 
 }

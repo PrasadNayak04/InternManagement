@@ -167,4 +167,9 @@ public class CandidateService implements CandidateServices
         return jdbcTemplate.queryForList(query, String.class, "ACTIVE");
     }
 
+    public List<?> getLocationsByDesignation(String designation){
+        String query = "select location from locations where designation = ? and vacancy > 0 and location != 'ANY' and deleted = 0";
+        return jdbcTemplate.queryForList(query, String.class, designation);
+    }
+
 }

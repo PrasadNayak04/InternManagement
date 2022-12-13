@@ -42,11 +42,11 @@ public class SchedulerConfig {
                     String creatorName;
                     for(String invitedEmail : invitedEmails){
                         creatorName = memberService.getMemberNameByEmail(eventReminder.getCreatorEmail());
-                        String message = "You have an upcoming event '" + eventReminder.getTitle() + "' on " + eventReminder.getDate().toLocalDate().getYear() + "," + eventReminder.getDate().toLocalDate().getMonth() + " " + eventReminder.getDate().toLocalDate().getDayOfMonth() + " At " + eventReminder.getVenue() + ", " + eventReminder.getLocation() + ". Created by " + creatorName;
+                        String message = "You have an upcoming event '" + eventReminder.getTitle() + "' on " + eventReminder.getDate().toLocalDate().getYear() + "," + memberService.camelCaseWord(eventReminder.getDate().toLocalDate().getMonth().toString()) + " " + eventReminder.getDate().toLocalDate().getDayOfMonth() + " At " + eventReminder.getVenue() + ", " + eventReminder.getLocation() + ". Created by " + creatorName;
                         String query2 = "insert into notifications(emailId, message, type, eventId)  values(?,?,?,?)";
                         jdbcTemplate.update(query2, invitedEmail, message, "REMINDER", eventReminder.getEventId());
                     }
-                    String message = "You have an upcoming event '" + eventReminder.getTitle() + "' on " + eventReminder.getDate().toLocalDate().getYear() + "," + eventReminder.getDate().toLocalDate().getMonth() + " " + eventReminder.getDate().toLocalDate().getDayOfMonth() + " At " + eventReminder.getVenue() + ", " + eventReminder.getLocation() + ". Created by you";
+                    String message = "You have an upcoming event '" + eventReminder.getTitle() + "' on " + eventReminder.getDate().toLocalDate().getYear() + "," + memberService.camelCaseWord(eventReminder.getDate().toLocalDate().getMonth().toString()) + " " + eventReminder.getDate().toLocalDate().getDayOfMonth() + " At " + eventReminder.getVenue() + ", " + eventReminder.getLocation() + ". Created by you";
                     String query2 = "insert into notifications(emailId, message, type, eventId)  values(?,?,?,?)";
                     jdbcTemplate.update(query2, eventReminder.getCreatorEmail(), message, "REMINDER", eventReminder.getEventId());
 

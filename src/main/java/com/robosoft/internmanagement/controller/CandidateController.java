@@ -45,4 +45,13 @@ public class CandidateController {
 
     }
 
+    @GetMapping("/available-locations")
+    public ResponseEntity<?> availableLocations(@RequestParam String position){
+        List<?> locations = candidateServices.getLocationsByDesignation(position);
+        if(locations.size()>0) {
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(locations, AppConstants.SUCCESS));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(locations, AppConstants.NO_RESULT_SUCCESS));
+    }
+
 }

@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -129,7 +130,7 @@ public class RecruiterService implements RecruiterServices {
                         return cvAnalysis;
                     }, date);
 
-            return cvAnalyses;
+            return Arrays.asList(date, cvAnalyses);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -153,17 +154,20 @@ public class RecruiterService implements RecruiterServices {
                         cvAnalysisList.add(cvAnalysis);
                         return cvAnalysis;
                     }, designation);
-            return cvAnalyses;
+            return Arrays.asList(designation, cvAnalyses);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
     }
 
-    public int updateStatus(String designation, String newStatus) {
+    public List<?> updateStatus(String designation, String newStatus, Date date) {
         try {
             query = "update technologies set status = ? where designation = ? and deleted = 0";
-            return jdbcTemplate.update(query, newStatus, designation);
+            jdbcTemplate.update(query, newStatus, designation);
+            if(date == null)
+                date = Date.valueOf(LocalDate.now());
+            return cvAnalysisPage(date);
         } catch (Exception e) {
             throw new DatabaseException(AppConstants.INVALID_INFORMATION);
         }
@@ -404,7 +408,7 @@ public class RecruiterService implements RecruiterServices {
     public List<?>  getAssignBoardPage(HttpServletRequest request) {
         String currentUser = memberService.getUserNameFromRequest(request);
         try {
-            query = "select candidatesprofile.candidateId,candidatesprofile.name,applications.designation,applications.location,assignboard.assignDate,membersprofile.name as organizer  from membersprofile inner join assignboard on membersprofile.emailId=organizerEmail inner join applications on assignboard.candidateId=applications.candidateId inner join candidatesprofile on candidatesprofile.candidateId=applications.candidateId where recruiterEmail=? and status = 'NEW' and membersprofile.deleted = 0 and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and applications.deleted = 0 group by applications.candidateId";
+            query = "select candidatesprofile.candidateId,candidatesprofile.name,applications.designation,applications.location,assignboard.assignDate,membersprofile.name as organizer, technologies.status from membersprofile inner join assignboard on membersprofile.emailId=organizerEmail inner join applications on assignboard.candidateId=applications.candidateId inner join candidatesprofile on candidatesprofile.candidateId=applications.candidateId inner join technologies on applications.designation=technologies.designation where recruiterEmail=? and assignboard.status = 'NEW' and membersprofile.deleted = 0 and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and applications.deleted = 0 and technologies.deleted=0 group by applications.candidateId";
             List<AssignBoardPage> assignBoardPages = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(AssignBoardPage.class), currentUser);
 
             return assignBoardPages;

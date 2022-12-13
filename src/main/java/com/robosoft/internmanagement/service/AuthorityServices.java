@@ -23,5 +23,7 @@ public interface AuthorityServices
 
     List<?> getAllLocations(int technologyId);
 
-    boolean updateLocation(int locationId, int newVacancy);
+    boolean updateLocation(Technology technology);
+
+    boolean updateDesignationStatus(String designation, String newStatus);
 }

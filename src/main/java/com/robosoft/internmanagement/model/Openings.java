@@ -15,6 +15,7 @@ public class Openings {
 
     private int technologyId;
     private String designation;
+    private String status;
     private List<Location> location;
 
 }

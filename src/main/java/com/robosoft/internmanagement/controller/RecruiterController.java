@@ -31,8 +31,8 @@ public class RecruiterController
     @Autowired
     private MemberServices memberServices;
 
-    @PutMapping("/candidate-rejection/{candidateId}")
-    public ResponseEntity<?> rejectCandidate(@PathVariable int candidateId, HttpServletRequest request){
+    @PutMapping("/candidate-rejection")
+    public ResponseEntity<?> rejectCandidate(@RequestBody int candidateId, HttpServletRequest request){
         if(recruiterServices.rejectAssignedCandidate(candidateId,request))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("TASK SUCCESSFUL", AppConstants.SUCCESS));
 
@@ -87,7 +87,7 @@ public class RecruiterController
     @GetMapping(value = "/summary")
     public ResponseEntity<?> getSummary(@RequestParam(required = false) Date date, HttpServletRequest request)
     {
-        Summary summary = recruiterServices.getSummary(date, request);
+        Summary summary = recruiterServices. getSummary(date, request);
         return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(summary, AppConstants.SUCCESS));
     }
 
@@ -120,11 +120,11 @@ public class RecruiterController
     }
 
     @PutMapping("/update-position-status")
-    public ResponseEntity<?> updatePositionStatus(@RequestParam String designation, @RequestParam String newStatus) {
-        int rowsUpdated = recruiterServices.updateStatus(designation, newStatus);
-        if (rowsUpdated > 0)
-            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("UPDATED", AppConstants.SUCCESS));
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("FAILED", AppConstants.RECORD_NOT_EXIST));
+    public ResponseEntity<?> updatePositionStatus(@RequestParam String designation, @RequestParam String newStatus, @RequestParam(required = false) Date date) {
+       List<?> CVAnalyses = recruiterServices.updateStatus(designation, newStatus, date);
+       if(CVAnalyses != null)
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(CVAnalyses, AppConstants.SUCCESS));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(CVAnalyses, AppConstants.RECORD_NOT_EXIST));
     }
 
     @GetMapping("/top-technologies/{designation}")

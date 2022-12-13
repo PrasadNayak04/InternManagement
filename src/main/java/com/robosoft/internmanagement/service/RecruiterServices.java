@@ -34,7 +34,7 @@ public interface RecruiterServices
 
     List<?> searchDesignation(String designation);
 
-    int updateStatus(String designation, String newStatus);
+    List<?> updateStatus(String designation, String newStatus, Date date);
 
     List<String> getLocationsByDesignation(String designation);
 

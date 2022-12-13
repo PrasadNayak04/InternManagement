@@ -3,7 +3,6 @@ package com.robosoft.internmanagement.service;
 import com.cloudinary.utils.ObjectUtils;
 import com.robosoft.internmanagement.constants.AppConstants;
 import com.robosoft.internmanagement.exception.DatabaseException;
-import com.robosoft.internmanagement.model.ResponseData;
 import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Event;
@@ -12,16 +11,14 @@ import com.robosoft.internmanagement.modelAttributes.MemberProfile;
 import com.robosoft.internmanagement.service.jwtSecurity.BeanStore;
 import com.robosoft.internmanagement.service.jwtSecurity.TokenManager;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -187,11 +184,11 @@ public class MemberService implements MemberServices
             }
 
             query = "insert into notifications(emailId, message, type, eventId) values (?,?,?,?)";
-            String message = "Event " + event.getTitle() + " created successfully on " + event.getDate().toLocalDate().getYear() + ", " + event.getDate().toLocalDate().getMonth() + " " + event.getDate().toLocalDate().getDayOfMonth();
+            String message = "Event " + event.getTitle() + " created successfully on " + event.getDate().toLocalDate().getYear() + ", " + camelCaseWord(event.getDate().toLocalDate().getMonth().toString()) + " " + event.getDate().toLocalDate().getDayOfMonth();
             jdbcTemplate.update(query, currentUser, message, "OTHERS", eventId);
 
             query = "insert into notifications(emailId, message, type, eventId) values (?,?,?,?)";
-            message = getMemberNameByEmail(currentUser) + " invited you to Join a Event " + event.getTitle() + " in " + event.getVenue() + " on " + event.getDate().toLocalDate().getYear() + ", " + event.getDate().toLocalDate().getMonth() + " " + event.getDate().toLocalDate().getDayOfMonth() + ". Would you like to join this event?";
+            message = getMemberNameByEmail(currentUser) + " invited you to Join a Event " + event.getTitle() + " in " + event.getVenue() + " on " + event.getDate().toLocalDate().getYear() + ", " + camelCaseWord(event.getDate().toLocalDate().getMonth().toString()) + " " + event.getDate().toLocalDate().getDayOfMonth() + ". Would you like to join this event?";
             for(String invitedEmail : event.getInvitedEmails()){
                 if(!invitedEmail.equals(getUserNameFromRequest(request)))
                     jdbcTemplate.update(query, invitedEmail, message, "INVITE", eventId);
@@ -261,9 +258,9 @@ public class MemberService implements MemberServices
             query = "select notificationId, message, date, type from notifications where emailId = ? and deleted =0 order by notificationId desc";
             List<Notification> notifications = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Notification.class), getUserNameFromRequest(request));
 
-            return notifications;
+            return Arrays.asList(notifications);
         } catch (Exception e) {
-            return null;
+            return Arrays.asList();
         }
     }
 
@@ -414,6 +411,10 @@ public class MemberService implements MemberServices
     public List<?> searchNotifications(String key, HttpServletRequest request){
         query = "select notificationId, message, date, type from notifications where emailId = ? and message REGEXP ? and deleted =0 order by notificationId desc";
         return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Notification.class), getUserNameFromRequest(request), key);
+    }
+
+    public String camelCaseWord(String word){
+        return word.replaceFirst(String.valueOf(word.charAt(0)), String.valueOf(word.charAt(0)).toUpperCase());
     }
 
 }

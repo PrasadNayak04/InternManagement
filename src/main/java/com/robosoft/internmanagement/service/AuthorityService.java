@@ -6,13 +6,11 @@ import com.robosoft.internmanagement.model.*;
 import com.robosoft.internmanagement.modelAttributes.AssignBoard;
 import com.robosoft.internmanagement.modelAttributes.Technology;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
-import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,9 +35,16 @@ public class AuthorityService implements AuthorityServices {
 
         query = "select count(designation) from technologies where designation = ? and deleted = 0";
         int count = jdbcTemplate.queryForObject(query, Integer.class, technology.getDesignation());
-
         if (count > 0) {
-            return new ResponseData<>("FAILED", AppConstants.RECORD_ALREADY_EXIST);
+            return new ResponseData<>("Already exists", AppConstants.RECORD_ALREADY_EXIST);
+        }
+
+        query = "select count(designation) from technologies where designation = ? and deleted = 1";
+        int deletedCount = jdbcTemplate.queryForObject(query, Integer.class, technology.getDesignation());
+
+        if (deletedCount > 0) {
+            updateLocation(technology);
+            return new ResponseData<>("New technology added", AppConstants.SUCCESS);
         }
 
         int totalVacancy = 0;
@@ -78,7 +83,7 @@ public class AuthorityService implements AuthorityServices {
     }
 
     public List<Application> getApplicants() {
-        query = "select candidateId, emailId, name, imageUrl, mobileNumber, designation,location,date from applications inner join candidatesprofile using(candidateId) inner join documents using(candidateId) where candidateId NOT IN (select candidateId from assignboard where assignboard.deleted = 0) and applications.deleted = 0 and documents.deleted = 0 and candidatesprofile.deleted = 0";
+        query = "select candidateId, emailId, name, imageUrl, mobileNumber, applications.designation, technologies.status, location,date from applications inner join candidatesprofile using(candidateId) inner join documents using(candidateId) inner join technologies on technologies.designation = candidatesprofile.position  where candidateId NOT IN (select candidateId from assignboard where assignboard.deleted = 0) and applications.deleted = 0 and documents.deleted = 0 and candidatesprofile.deleted = 0 and technologies.deleted = 0";
         return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Application.class));
     }
 
@@ -116,13 +121,14 @@ public class AuthorityService implements AuthorityServices {
 
     public List<?> viewOpenings() {
         List<Openings> openingsList = new ArrayList<>();
-        query = "select technologyId, designation from technologies where deleted = 0";
+        query = "select technologyId, designation, status from technologies where deleted = 0";
         try{
             openingsList =  jdbcTemplate.query(query,
                     (resultSet, no) -> {
                         Openings openings =new Openings();
                         openings.setTechnologyId(resultSet.getInt(1));
                         openings.setDesignation(resultSet.getString(2));
+                        openings.setStatus(resultSet.getString(3));
                         List<Location> locations = getOpening(openings.getDesignation());
                         openings.setLocation(locations);
                         return openings;
@@ -147,9 +153,28 @@ public class AuthorityService implements AuthorityServices {
         return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Location.class), technologyId);
     }
 
-    public boolean updateLocation(int locationId, int newVacancy){
-        query = "update locations set vacancy = ? where locationId = ? and deleted = 0";
-        return jdbcTemplate.update(query, newVacancy, locationId) > 0;
+    public boolean updateLocation(Technology technology){
+        int result = 1;
+        int totalVacancy = 0;
+        for(Map.Entry<String, Integer> entry : technology.getLocations().entrySet()) {
+            query = "update locations set vacancy = ? where location = ? and designation = ? and deleted = 0";
+            result *= jdbcTemplate.update(query, entry.getValue(), entry.getKey(), technology.getDesignation());
+            totalVacancy += entry.getValue();
+        }
+        query = "update technologies set vacancy = ? where designation = ? and deleted = 0";
+        jdbcTemplate.update(query, totalVacancy, technology.getDesignation());
+
+        return result > 0;
+    }
+
+    public boolean updateDesignationStatus(String designation, String newStatus){
+        try {
+            query = "update technologies set status = ? where designation = ? and deleted = 0";
+            return jdbcTemplate.update(query, newStatus, designation) > 0;
+        } catch (Exception e) {
+            throw new DatabaseException(AppConstants.INVALID_INFORMATION);
+        }
+
     }
 
 }

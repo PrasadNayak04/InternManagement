@@ -42,6 +42,7 @@ public interface MemberServices
     boolean removeNotification(int notificationId, HttpServletRequest request);
 
     List<?> getAllMembers();
+
     Boolean updateProfile(LoggedMemberProfile memberProfile, HttpServletRequest request) throws IOException;
 
     List<?> searchNotifications(String key, HttpServletRequest request);

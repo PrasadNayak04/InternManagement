@@ -19,6 +19,7 @@ public class Application {
     private String imageUrl;
     private long mobileNumber;
     private String designation;
+    private String status;
     private String location;
     private Date date;
 

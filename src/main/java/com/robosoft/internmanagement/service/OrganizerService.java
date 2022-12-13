@@ -31,7 +31,7 @@ public class OrganizerService implements OrganizerServices
     public List<?> assignedCandidates(HttpServletRequest request)
     {
         try {
-            String query = "select candidateId, emailId,name, mobileNumber, position as designation, jobLocation as location from candidatesprofile  inner join assignboard using(candidateId) where status = 'NEW' and organizeremail = ? and candidatesprofile.deleted = 0 and assignboard.deleted = 0";
+            String query = "select candidateId, emailId,name, mobileNumber, position as designation, technologies.status, jobLocation as location from candidatesprofile  inner join assignboard using(candidateId) inner join technologies on technologies.designation = candidatesprofile.position where assignboard.status = 'NEW' and organizeremail = ? and candidatesprofile.deleted = 0 and assignboard.deleted = 0 and technologies.deleted = 0";
             return jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Application.class),  memberService.getUserNameFromRequest(request));
         }catch (Exception e)
         {

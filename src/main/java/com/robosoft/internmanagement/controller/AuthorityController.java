@@ -84,11 +84,18 @@ public class AuthorityController {
     }
 
     @PutMapping("/vacancy-updater")
-    public ResponseEntity<?> vacancyUpdate(@RequestParam int locationId,@RequestParam int vacancy)
+    public ResponseEntity<?> vacancyUpdate(@RequestBody Technology technology)
     {
-        if(authorityServices.updateLocation(locationId,vacancy))
+        if(authorityServices.updateLocation(technology))
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("New Vacancy Updated", AppConstants.SUCCESS));
-        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("Record not found", AppConstants.RECORD_NOT_EXIST));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("Few locations may not available for this technology", AppConstants.RECORD_NOT_EXIST));
+    }
+
+    @PutMapping("/update-designation-status")
+    public ResponseEntity<?> updatePositionStatus(@RequestParam String designation, @RequestParam String newStatus) {
+        if(authorityServices.updateDesignationStatus(designation, newStatus))
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("Status Updated", AppConstants.SUCCESS));
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>("Failed", AppConstants.TASK_FAILED));
     }
 
 
