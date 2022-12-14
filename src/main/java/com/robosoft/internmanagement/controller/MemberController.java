@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000"})
+@CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000", "https://internmanagement.netlify.app/"})
 @RequestMapping(value = "/intern-management/member")
 public class MemberController {
 
@@ -101,7 +101,7 @@ public class MemberController {
     }
 
     @GetMapping("/notifications-search")
-    public ResponseEntity<?> searchNotification(@RequestBody String key, HttpServletRequest request){
+    public ResponseEntity<?> searchNotification(@RequestParam String key, HttpServletRequest request){
         List<?> notifications = memberServices.searchNotifications(key, request);
         if(notifications.size() > 0)
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(notifications, AppConstants.RECORD_NOT_EXIST));

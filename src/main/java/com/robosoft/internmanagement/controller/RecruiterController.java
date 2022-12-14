@@ -17,7 +17,7 @@ import javax.validation.Valid;
 import java.sql.Date;
 import java.util.List;
 
-@CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000"})
+@CrossOrigin( methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH, RequestMethod.OPTIONS}, origins ={"http://localhost:4200", "http://localhost:3000", "https://internmanagement.netlify.app/"})
 @RestController
 @RequestMapping(value = "/intern-management/recruiter")
 public class RecruiterController
@@ -201,6 +201,16 @@ public class RecruiterController
     public ResponseEntity<?> getCvPage(HttpServletRequest request)
     {
         List<?> rejectedCvs = recruiterServices.getRejectedCvPage(request);
+        if(rejectedCvs.size() == 0){
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(rejectedCvs, AppConstants.NO_RESULT_SUCCESS));
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(rejectedCvs, AppConstants.SUCCESS));
+    }
+
+    @GetMapping("/rejected-cv-search")
+    public ResponseEntity<?> cVPageSearch(@RequestParam String key, HttpServletRequest request)
+    {
+        List<?> rejectedCvs = recruiterServices.rejectedCVSearch(key,request);
         if(rejectedCvs.size() == 0){
             return ResponseEntity.status(HttpStatus.OK).body(new ResponseData<>(rejectedCvs, AppConstants.NO_RESULT_SUCCESS));
         }

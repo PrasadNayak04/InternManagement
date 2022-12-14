@@ -419,7 +419,7 @@ public class RecruiterService implements RecruiterServices {
         }
     }
 
-    public List<?> getRejectedCvPage(HttpServletRequest request) {
+    public List<RejectedCv> getRejectedCvPage(HttpServletRequest request) {
         List<RejectedCv> rejectedCvList = new ArrayList<>();
         try {
 
@@ -444,6 +444,16 @@ public class RecruiterService implements RecruiterServices {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public List<?> rejectedCVSearch(String key, HttpServletRequest request) {
+        List<RejectedCv> rejectedCvs = new ArrayList<>();
+        key = key.toUpperCase();
+        for(RejectedCv rejectedCv : getRejectedCvPage(request)){
+            if(rejectedCv.getName().toUpperCase().contains(key) || rejectedCv.getLocation().toUpperCase().contains(key) || rejectedCv.getDesignation().toUpperCase().contains(key))
+                rejectedCvs.add(rejectedCv);
+        }
+        return rejectedCvs;
     }
 
     public Invite getInviteInfo(HttpServletRequest request) {

@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -166,6 +167,9 @@ public class MemberService implements MemberServices
 
         String currentUser = getUserNameFromRequest(request);
 
+        if(dateBeforeToday(event.getDate()))
+            return false;
+
         query = "insert into events (creatorEmail, title, venue, location, date, time, period, description) values(?,?,?,?,?,?,?,?)";
         int eventId = 0;
         try{
@@ -202,6 +206,11 @@ public class MemberService implements MemberServices
         }
     }
 
+    public boolean dateBeforeToday(Date date){
+        query = "select curdate() <= ?";
+        return jdbcTemplate.queryForObject(query, Integer.class, date) == 1;
+    }
+
     public void rollbackEvent(int eventId){
         query = "delete from events where eventId = ?";
         jdbcTemplate.update(query, eventId);
@@ -215,7 +224,7 @@ public class MemberService implements MemberServices
         try{
             //Event invite table status update
             int eventId = jdbcTemplate.queryForObject(query, Integer.class, notificationId);
-            query = "update eventsinvites set status = ? where eventId = ? and invitedEmail = ?";
+            query = "update eventsinvites set status = ? where eventId = ? and invitedEmail = ?  and status is null";
             int inviteExist = jdbcTemplate.update(query, status, eventId, getUserNameFromRequest(request));
             if(inviteExist == 0){
                 throw new DatabaseException(AppConstants.RECORD_NOT_EXIST);
@@ -242,7 +251,7 @@ public class MemberService implements MemberServices
             else
                 reaction = "declined";
 
-            message = "You " + reaction + " the event invite '" + eventTitle + "' by " + eventCreator;
+            message = "You " + reaction + " the event invite '" + eventTitle + "' by " + getMemberNameByEmail(eventCreator);
             jdbcTemplate.update(query, getUserNameFromRequest(request), message, "OTHERS");
 
             return true;
@@ -258,7 +267,7 @@ public class MemberService implements MemberServices
             query = "select notificationId, message, date, type from notifications where emailId = ? and deleted =0 order by notificationId desc";
             List<Notification> notifications = jdbcTemplate.query(query, new BeanPropertyRowMapper<>(Notification.class), getUserNameFromRequest(request));
 
-            return Arrays.asList(notifications);
+            return notifications;
         } catch (Exception e) {
             return Arrays.asList();
         }
@@ -388,6 +397,7 @@ public class MemberService implements MemberServices
             }
             return true;
         } catch (Exception e) {
+            e.printStackTrace();
             query = "update membersprofile set photoUrl = ?,mobileNumber = ?,name = ?, designation = ? where emailId = ? and deleted = 0";
             jdbcTemplate.update(query, loggedProfile.getProfileImage(),loggedProfile.getMobileNumber(),loggedProfile.getName(),loggedProfile.getDesignation(), getUserNameFromRequest(request));
             e.printStackTrace();
@@ -414,7 +424,10 @@ public class MemberService implements MemberServices
     }
 
     public String camelCaseWord(String word){
-        return word.replaceFirst(String.valueOf(word.charAt(0)), String.valueOf(word.charAt(0)).toUpperCase());
+        if (word.length() == 0)
+            return "";
+        String lowerCaseWord = word.toLowerCase();
+        return lowerCaseWord.replaceFirst(String.valueOf(lowerCaseWord.charAt(0)), String.valueOf(lowerCaseWord.charAt(0)).toUpperCase());
     }
 
 }

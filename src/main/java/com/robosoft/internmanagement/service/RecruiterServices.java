@@ -62,6 +62,8 @@ public interface RecruiterServices
 
     List<?> getRejectedCvPage(HttpServletRequest request);
 
+    List<?> rejectedCVSearch(String key, HttpServletRequest request);
+
     Invite getInviteInfo(HttpServletRequest request);
 
     List<?> getByDay(Date date, HttpServletRequest request);
