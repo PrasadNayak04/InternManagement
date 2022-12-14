@@ -207,7 +207,7 @@ public class MemberService implements MemberServices
     }
 
     public boolean dateBeforeToday(Date date){
-        query = "select curdate() <= ?";
+        query = "select ? < curdate()";
         return jdbcTemplate.queryForObject(query, Integer.class, date) == 1;
     }
 
